@@ -1,0 +1,28 @@
+manifest:
+  self:
+    path: crosscon-uc1-1
+
+  defaults:
+    remote: upstream
+
+  remotes:
+    - name: upstream
+      url-base: https://github.com/zephyrproject-rtos
+
+  projects:
+    - name: zephyr
+      revision: v4.0.0
+      path: zephyr
+      west-commands: scripts/west-commands.yml
+
+    - name: hal_nxp
+      revision: 3c64cd63125c86870802a561ce79dc33697b005c
+      path: modules/hal/nxp
+      groups:
+        - hal
+
+    - name: cmsis
+      revision: 4b96cbb174678dcd3ca86e11e1f24bc5f8726da0
+      path: modules/hal/cmsis
+      groups:
+        - hal
