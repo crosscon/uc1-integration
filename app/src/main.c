@@ -28,6 +28,11 @@ static struct net_mgmt_event_callback mgmt_cb;
 
 static struct net_dhcpv4_option_callback dhcp_cb;
 
+/* Wi-Fi Configuration */
+#define WIFI_SSID "rpi3-hotspot"
+#define WIFI_PASSWORD "rpi3-pass"
+#define WIFI_SECURITY_TYPE WIFI_SECURITY_TYPE_PSK
+
 static void start_dhcpv4_client(struct net_if *iface, void *user_data)
 {
 	ARG_UNUSED(user_data);
