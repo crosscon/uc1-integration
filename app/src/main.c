@@ -162,18 +162,16 @@ int main(void) {
   net_mgmt_init_event_callback(&cb, wifi_event_handler, NET_EVENT_WIFI_MASK);
   net_mgmt_add_event_callback(&cb);
 
+  net_mgmt_init_event_callback(&mgmt_cb, handler, NET_EVENT_IPV4_ADDR_ADD);
+  net_mgmt_add_event_callback(&mgmt_cb);
+  net_dhcpv4_init_option_callback(&dhcp_cb, option_handler, DHCP_OPTION_NTP,
+                                  ntp_server, sizeof(ntp_server));
+  net_dhcpv4_add_option_callback(&dhcp_cb);
+
   connect_to_wifi();
 
   LOG_INF("Run dhcpv4 client");
-
-  net_mgmt_init_event_callback(&mgmt_cb, handler, NET_EVENT_IPV4_ADDR_ADD);
-  net_mgmt_add_event_callback(&mgmt_cb);
-
-  net_dhcpv4_init_option_callback(&dhcp_cb, option_handler, DHCP_OPTION_NTP,
-                                  ntp_server, sizeof(ntp_server));
-
-  net_dhcpv4_add_option_callback(&dhcp_cb);
-
   net_if_foreach(start_dhcpv4_client, NULL);
+
   return 0;
 }
