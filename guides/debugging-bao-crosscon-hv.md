@@ -23,9 +23,8 @@ dependencies for debugging.
     docker run --rm -it --privileged -v /dev:/dev -v .:/workdir bao-hypervisor-image bash
     ```
 
-Note: it is required to prepare the file `baremetal.elf` from building the `bao`
-hypervisor as `bao.elf` in the current directory. It will be available from the
-container.
+Note: it is required to prepare the file `bao.elf` from building the `bao`
+hypervisor in the current directory. It will be available from the container.
 
 ## Flashing required firmware
 
