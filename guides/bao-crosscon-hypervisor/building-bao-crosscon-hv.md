@@ -75,7 +75,7 @@ flashed on the platform.
 6. Copy binary to workspace as `bao.bin`:
 
     ```bash
-    cp ./bin/bao.bin ../bao.bin
+    cp ./bin/lpc55s69/lpc55/bao.bin ../bao.bin
     ```
 
 ## Build applications
