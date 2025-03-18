@@ -16,7 +16,7 @@ flashed on the platform.
 2. Build the container:
 
     ```bash
-    docker build . -t bao-hypervisor-image
+    docker build guides/bao-crosscon-hypervisor/sources/ -t bao-hypervisor-image
     ```
 
 3. Run container shell:
