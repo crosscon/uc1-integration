@@ -62,7 +62,6 @@ flashed on the platform.
 5. Build the hypervisor binary:
 
     ```bash
-    cd bao-hypervisor
     make clean
     export CROSS_COMPILE=arm-none-eabi-
     export PLATFORM=lpc55s69
