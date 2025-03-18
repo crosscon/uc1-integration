@@ -32,7 +32,7 @@
 2. Copy `config.c` to `bao-hypervisor/configs/lpc55.c`
 
     ```bash
-    cp ../config.c ./configs/lpc55.c
+    cp ../guides/bao-crosscon-hypervisor/sources/config.c ./configs/lpc55.c
     ```
 
 3. Change branch in `bao-hypervisor` to `exp/armv8m-sched`:
@@ -44,7 +44,7 @@
 4. Apply patch `makefile-patch.diff`:
 
     ```bash
-    git apply ../makefile-patch.diff
+    git apply ../guides/bao-crosscon-hypervisor/sources/makefile-patch.diff
     ```
 
 5. Build the hypervisor binary:
