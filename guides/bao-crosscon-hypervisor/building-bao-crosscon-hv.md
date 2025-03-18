@@ -1,5 +1,9 @@
 # Build hypervisor
 
+This document guides through building the bao hypervisor, two example vm
+applications, vm0 and vm1, and assembling them into one binary, which can be
+flashed on the platform.
+
 ## Preparation
 
 1. Clone repositories
