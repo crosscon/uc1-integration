@@ -16,7 +16,7 @@ flashed on the platform.
 2. Build the container:
 
     ```bash
-    docker build guides/bao-crosscon-hypervisor/sources/ -t bao-hypervisor-image
+    docker build resources/building-bao-hypervisor/ -t bao-hypervisor-image
     ```
 
 3. Run container shell:
@@ -36,7 +36,7 @@ flashed on the platform.
 2. Copy `config.c` to `bao-hypervisor/configs/lpc55.c`
 
     ```bash
-    cp ../guides/bao-crosscon-hypervisor/sources/config.c ./configs/lpc55.c
+    cp ../resources/building-bao-hypervisor/config.c ./configs/lpc55.c
     ```
 
 3. Change branch in `bao-hypervisor` to `exp/armv8m-sched`:
@@ -56,7 +56,7 @@ flashed on the platform.
 4. Apply patch `makefile-patch.diff`:
 
     ```bash
-    git apply ../guides/bao-crosscon-hypervisor/sources/makefile-patch.diff
+    git apply ../resources/building-bao-hypervisor/makefile-patch.diff
     ```
 
 5. Build the hypervisor binary:
