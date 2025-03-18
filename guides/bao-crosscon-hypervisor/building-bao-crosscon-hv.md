@@ -116,10 +116,10 @@
 
     Resulting binary can be found at: `build/lpc55s69/baremetal.bin`
 
-7. Copy binary to workspace as `vm0.bin`:
+7. Copy binary to workspace as `vm1.bin`:
 
     ```bash
-    cp ./build/lpc55s69/baremetal.bin ../vm0.bin
+    cp ./build/lpc55s69/baremetal.bin ../vm1.bin
     ```
 
 ## Assemble final binary
