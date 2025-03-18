@@ -1,9 +1,14 @@
 FROM ubuntu:22.04
 
 # Set environment variables
+ENV WORKDIR_PATH=/work
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TOOLCHAIN_URL=https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz
 ENV TOOLCHAIN_DIR=/opt/arm-toolchain
+
+WORKDIR $WORKDIR_PATH
+
+SHELL ["/bin/bash", "-c"]
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -14,7 +19,13 @@ RUN apt-get update && apt-get install -y \
     xz-utils \
     build-essential \
     libstdc++6 \
-    && rm -rf /var/lib/apt/lists/*
+    dfu-util \
+    libusb-1.0-0-dev \
+    usbutils \
+    python3-tk \
+    && apt clean && rm -rf /var/lib/apt/lists/*
+
+ENV PATH=$PATH:/root/.local/bin
 
 # Download and extract Arm GNU Toolchain
 RUN mkdir -p $TOOLCHAIN_DIR && \
@@ -25,9 +36,19 @@ RUN mkdir -p $TOOLCHAIN_DIR && \
 # Add toolchain to PATH
 ENV PATH="$TOOLCHAIN_DIR/bin:$PATH"
 
-# Verify installation
+# Verify toolchain installation
 RUN arm-none-eabi-gcc --version
 
-WORKDIR /workspace
+# Install LinkServer
+COPY files/MCU-Link_Patched_3.153.deb $WORKDIR_PATH/LinkServer/
+COPY files/LPCScrypt_Patched_2.1.3.deb $WORKDIR_PATH/LinkServer/
+COPY files/LinkServer_Patched_24.12.21.x86_64.deb $WORKDIR_PATH/LinkServer/
+
+RUN dpkg -i $WORKDIR_PATH/LinkServer/LPCScrypt_Patched_2.1.3.deb && \
+    dpkg -i $WORKDIR_PATH/LinkServer/MCU-Link_Patched_3.153.deb && \
+    dpkg -i $WORKDIR_PATH/LinkServer/LinkServer_Patched_24.12.21.x86_64.deb
+
+ENV PATH=$PATH:/usr/local/LinkServer/
+ENV PATH=$PATH:/usr/local/LinkServer/lpcscrypt/bin
 
 CMD ["/bin/bash"]
