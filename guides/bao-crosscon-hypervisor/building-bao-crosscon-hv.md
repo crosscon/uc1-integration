@@ -135,9 +135,9 @@ At this point, all 3 binaries should be available in the workspace directory:
 To create a final binary that can be flashed onto the board:
 
 ```bash
-dd if=/dev/zero of=demo.bin bs=1k count=512
-dd if=bao.bin of=demo.bin bs=1 seek=0 conv=notrunc
-dd if=vm0.bin of=demo.bin bs=1 seek=131072 conv=notrunc
+dd if=/dev/zero of=demo.bin bs=1k count=512 &&
+dd if=bao.bin of=demo.bin bs=1 seek=0 conv=notrunc &&
+dd if=vm0.bin of=demo.bin bs=1 seek=131072 conv=notrunc &&
 dd if=vm1.bin of=demo.bin bs=1 seek=262144 conv=notrunc
 ```
 
