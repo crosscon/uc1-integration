@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     libstdc++6 \
     dfu-util \
     libusb-1.0-0-dev \
+    libncursesw5 \
     usbutils \
     python3-tk \
     && apt clean && rm -rf /var/lib/apt/lists/*
