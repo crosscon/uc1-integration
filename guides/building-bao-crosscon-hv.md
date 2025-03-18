@@ -66,6 +66,7 @@ flashed on the platform.
     export CROSS_COMPILE=arm-none-eabi-
     export PLATFORM=lpc55s69
     export CONFIG=lpc55
+    export DEBUG=y
     make
     ```
 
