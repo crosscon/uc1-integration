@@ -62,12 +62,7 @@ flashed on the platform.
 5. Build the hypervisor binary:
 
     ```bash
-    make clean
-    export CROSS_COMPILE=arm-none-eabi-
-    export PLATFORM=lpc55s69
-    export CONFIG=lpc55
-    export DEBUG=y
-    make
+    make clean && make PLATFORM=lpc55s69 CONFIG=lpc55 DEBUG=y
     ```
 
     Resulting binary can be found at: `bao-hypervisor/bin/bao.bin`
@@ -103,11 +98,7 @@ flashed on the platform.
 3. Build the application:
 
     ```bash
-    make clean
-    export CROSS_COMPILE=arm-none-eabi-
-    export PLATFORM=lpc55s69
-    export CONFIG=lpc55
-    make
+    make clean && make PLATFORM=lpc55s69
     ```
 
     Resulting binary can be found at: `build/lpc55s69/baremetal.bin`
@@ -127,11 +118,7 @@ flashed on the platform.
 6. Build the application:
 
     ```bash
-    make clean
-    export CROSS_COMPILE=arm-none-eabi-
-    export PLATFORM=lpc55s69
-    export CONFIG=lpc55
-    make
+    make clean && make PLATFORM=lpc55s69
     ```
 
     Resulting binary can be found at: `build/lpc55s69/baremetal.bin`
