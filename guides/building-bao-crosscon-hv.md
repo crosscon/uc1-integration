@@ -155,3 +155,51 @@ The resulting file `demo.bin` will contain:
 2. VM0 (from `vm0.bin`) at 0x00020000 (131072 in decimal)
 
 3. VM1 (from `vm1.bin`) at 0x00040000 (262144 in decimal)
+
+## Flash binaries on the board
+
+This section covers flashing the resulting binaries on the board, with either
+LinkServer and lpc55 tools.
+
+### Flash with lpc55
+
+1. Check available bootloaders:
+
+    ```bash
+    lpc55 ls
+    ```
+
+2. Flash the binary:
+
+    ```bash
+    lpc55 write-flash demo.bin
+    ```
+
+### Flash with LinkServer
+
+To flash with LinkServer, instead of `.bin`, all 3 `.elf` files are required.
+
+Flashing via the LinkServer will not work on the RPI platform due to
+architecture mismatch.
+
+1. Check probes:
+
+    ```bash
+    LinkServer probes
+    ```
+
+    Example output:
+
+    ```bash
+      #  Description                 Serial    Device    Board
+     -------
+      1  LPC-LINK2 CMSIS-DAP V5.460  ORAQBQIR
+    ```
+
+2. Flash the `.elf` files:
+
+    ```bash
+    LinkServer flash LPC55S69:LPCXpresso55S69 load bao.elf
+    LinkServer flash LPC55S69:LPCXpresso55S69 load vm0.elf
+    LinkServer flash LPC55S69:LPCXpresso55S69 load vm1.elf
+    ```
