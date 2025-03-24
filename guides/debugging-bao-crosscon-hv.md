@@ -102,6 +102,9 @@ For the hypervisor itself, UART will be available through the `Debug Link`
 
 ## Starting the debug session
 
+Note: to be able to receive any output from the VM's, it is required to disable
+the `Hardware Flow Control` in the minicom settings.
+
 1. Check the board with `lsusb`:
 
     ```bash
