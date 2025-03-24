@@ -87,14 +87,29 @@ hypervisor in the current directory. It will be available from the container.
 
 6. Remove the `DFU` jumper (`J4`) jumper from the board. Power cycle the board.
 
-7. Check the board with `lsusb`:
+## Connecting the UART receivers
+
+1. For the `VM0`, UART is located on the `MikroBus`:
+
+    ![UART for VM0](../resources/images/debugging-bao-crosscon-hv/uart-vm0.png)
+
+2. For the `VM1`, UART is located on the `P20` connector (Only `RXD`):
+
+    ![UART for VM1](../resources/images/debugging-bao-crosscon-hv/uart-vm1.png)
+
+For the hypervisor itself, UART will be available through the `Debug Link`
+(`P6`).
+
+## Starting the debug session
+
+1. Check the board with `lsusb`:
 
     ```bash
     root@e18aebda6c80:/work# lsusb | grep -i nxp
     Bus 003 Device 036: ID 1fc9:0090 NXP Semiconductors LPC-LINK2 CMSIS-DAP V5.460
     ```
 
-8. Check available probes:
+2. Check available probes:
 
     ```bash
     root@e18aebda6c80:/work# LinkServer probes
@@ -103,7 +118,7 @@ hypervisor in the current directory. It will be available from the container.
       1  LPC-LINK2 CMSIS-DAP V5.460  ORAQBQIR
     ```
 
-9. Start `gdbserver` as a background process:
+3. Start `gdbserver` as a background process:
 
     ```bash
     root@e18aebda6c80:/work# LinkServer gdbserver LPC55S69:LPCXpresso55S69 &
@@ -118,7 +133,7 @@ hypervisor in the current directory. It will be available from the container.
 
     Wait about 5 seconds for it to setup.
 
-10. Run `arm-none-eabi-gdb`:
+4. Run `arm-none-eabi-gdb`:
 
     Note: `gdb` is part of the same toolchain that is already used for building
     applications for the LPC - see the Dockerfile for building bao hypervisor
