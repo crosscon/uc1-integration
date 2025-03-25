@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 # Set environment variables
-ENV WORKDIR_PATH=/work
+ENV WORKDIR_PATH=/workdir
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TOOLCHAIN_URL=https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz
 ENV TOOLCHAIN_DIR=/opt/arm-toolchain
