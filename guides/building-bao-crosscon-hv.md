@@ -129,7 +129,16 @@ flashed on the platform.
     cp ./build/lpc55s69/baremetal.bin ../vm1.bin
     ```
 
-## Assemble final binary
+## Flash binaries on the board
+
+This section covers flashing the resulting binaries on the board, with either
+LinkServer and lpc55 tools.
+
+### Flash with lpc55
+
+The `lpc55` tool is to be used on the ARM-based platforms, such as RPI.
+
+#### Assemble final binary
 
 At this point, all 3 binaries should be available in the workspace directory:
 
@@ -156,14 +165,7 @@ The resulting file `demo.bin` will contain:
 
 3. VM1 (from `vm1.bin`) at 0x00040000 (262144 in decimal)
 
-## Flash binaries on the board
-
-This section covers flashing the resulting binaries on the board, with either
-LinkServer and lpc55 tools.
-
-### Flash with lpc55
-
-The `lpc55` tool is to be used on the ARM-based platforms, such as RPI.
+#### Flash assembled binary
 
 1. Check available bootloaders:
 
