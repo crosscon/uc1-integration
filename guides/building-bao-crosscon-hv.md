@@ -45,13 +45,12 @@ flashed on the platform.
     git checkout exp/armv8m-sched
     ```
 
-    * If above command fails with message below:
+    * If above command fails with message below, please follow instruction
+      provided by git:
 
       ```bash
       fatal: detected dubious ownership in repository at '/workspace/bao-hypervisor'
       ```
-
-      please follow instruction provided by git
 
 4. Apply patch `makefile-patch.diff`:
 
@@ -87,13 +86,12 @@ flashed on the platform.
     git checkout exp/armv8m\_20000
     ```
 
-    * If above command fails with message below:
+    * If above command fails with message below, please follow instruction
+      provided by git:
 
       ```bash
       fatal: detected dubious ownership in repository at '/workspace/bao-baremetal-guest'
       ```
-
-      please follow instruction provided by git
 
 3. Build the application:
 
