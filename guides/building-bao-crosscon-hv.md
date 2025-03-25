@@ -25,6 +25,12 @@ flashed on the platform.
     docker run -it -v .:/workspace/ bao-hypervisor-image bash
     ```
 
+4. Create the target directory
+
+    ```bash
+    mkdir /workdir/binaries
+    ```
+
 ## Build the Hypervisor
 
 1. Enter the directory:
