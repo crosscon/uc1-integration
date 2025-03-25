@@ -24,7 +24,8 @@ dependencies for debugging.
     ```
 
 Note: it is required to prepare the file `bao.elf` from building the `bao`
-hypervisor in the current directory. It will be available from the container.
+hypervisor in the repository root directory. It will be available from the
+container.
 
 ## Flashing required firmware
 
