@@ -31,6 +31,12 @@ flashed on the platform.
     mkdir /workdir/binaries
     ```
 
+5. Enter the workdir
+
+    ```bash
+    cd /workdir
+    ```
+
 ## Build the Hypervisor
 
 1. Enter the directory:
