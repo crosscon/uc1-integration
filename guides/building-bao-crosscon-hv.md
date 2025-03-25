@@ -69,7 +69,9 @@ flashed on the platform.
 6. Copy binary to workspace as `bao.bin`:
 
     ```bash
-    cp ./bin/lpc55s69/lpc55/bao.bin ../bao.bin
+    cd ./bin/lpc55s69/lpc55/
+    cp bao.bin bao.elf /workdir/binaries/
+    cd -
     ```
 
 ## Build applications
@@ -104,7 +106,10 @@ flashed on the platform.
 4. Copy binary to workspace as `vm0.bin`:
 
     ```bash
-    cp ./build/lpc55s69/baremetal.bin ../vm0.bin
+    cd ./build/lpc55s69/
+    cp baremetal.bin /workdir/binaries/vm0.bin
+    cp baremetal.elf /workdir/binaries/vm0.elf
+    cd -
     ```
 
 5. Change branch to `exp/armv8m\_40000` (VM1):
@@ -124,13 +129,22 @@ flashed on the platform.
 7. Copy binary to workspace as `vm1.bin`:
 
     ```bash
-    cp ./build/lpc55s69/baremetal.bin ../vm1.bin
+    cd ./build/lpc55s69/
+    cp baremetal.bin /workdir/binaries/vm1.bin
+    cp baremetal.elf /workdir/binaries/vm1.elf
+    cd -
     ```
 
 ## Flash binaries on the board
 
 This section covers flashing the resulting binaries on the board, with either
 LinkServer and lpc55 tools.
+
+The following actions should be performed in the `binaries/` dir:
+
+```bash
+cd /workdir/binaries
+```
 
 ### Flash with lpc55
 
