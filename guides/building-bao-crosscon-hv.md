@@ -205,7 +205,7 @@ The resulting file `demo.bin` will contain:
 
 ### Flash with LinkServer
 
-The `lpc55` tool is to be used only on x86 platforms.
+The `LinkServer` tool is to be used only on x86 platforms.
 
 To flash with LinkServer, instead of `.bin`, all 3 `.elf` files are required.
 
