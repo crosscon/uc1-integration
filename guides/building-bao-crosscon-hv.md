@@ -163,6 +163,8 @@ LinkServer and lpc55 tools.
 
 ### Flash with lpc55
 
+The `lpc55` tool is to be used on the ARM-based platforms, such as RPI.
+
 1. Check available bootloaders:
 
     ```bash
@@ -177,10 +179,9 @@ LinkServer and lpc55 tools.
 
 ### Flash with LinkServer
 
-To flash with LinkServer, instead of `.bin`, all 3 `.elf` files are required.
+The `lpc55` tool is to be used only on x86 platforms.
 
-Flashing via the LinkServer will not work on the RPI platform due to
-architecture mismatch.
+To flash with LinkServer, instead of `.bin`, all 3 `.elf` files are required.
 
 1. Check probes:
 
