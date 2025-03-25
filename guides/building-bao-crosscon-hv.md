@@ -22,7 +22,7 @@ flashed on the platform.
 3. Run container shell:
 
     ```bash
-    docker run -it -v .:/workspace/ bao-hypervisor-image bash
+    docker run -it -v .:/workdir/ bao-hypervisor-image bash
     ```
 
 4. Create the target directory
@@ -34,7 +34,7 @@ flashed on the platform.
 5. Enter the workdir
 
     ```bash
-    cd /workdir
+    cd /workdir/binaries
     ```
 
 ## Build the Hypervisor
