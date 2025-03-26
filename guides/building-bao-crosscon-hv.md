@@ -115,7 +115,7 @@ flashed on the platform.
 
     Resulting binaries can be found at: `build/lpc55s69/`
 
-4. Copy binary to workspace as `vm0.bin`:
+4. Copy vm0 binaries to the workspace:
 
     ```bash
     cd ./build/lpc55s69/
@@ -132,7 +132,7 @@ flashed on the platform.
 
     Resulting binaries can be found at: `build/lpc55s69/`
 
-6. Copy binary to workspace as `vm1.bin`:
+6. Copy vm1 binaries to the workspace:
 
     ```bash
     cd ./build/lpc55s69/
