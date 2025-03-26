@@ -1,0 +1,18 @@
+diff --git a/Makefile b/Makefile
+index 142848a1046d..6332973082b9 100644
+--- a/Makefile
++++ b/Makefile
+@@ -47,10 +47,10 @@ endif
+ HOST_CC:=gcc
+
+ #Makefile arguments and default values
+-DEBUG:=n
++DEBUG?=
+ OPTIMIZATIONS:=2
+-CONFIG=
+-PLATFORM=
++CONFIG?=
++PLATFORM?=
+
+ # Setup version
+
