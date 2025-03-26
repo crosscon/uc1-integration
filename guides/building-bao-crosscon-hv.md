@@ -94,10 +94,10 @@ flashed on the platform.
     cd bao-baremetal-guest
     ```
 
-2. Change branch to `exp/armv8m\_20000` (VM0):
+2. Change branch to `exp/armv8m-ipc`:
 
     ```bash
-    git checkout exp/armv8m\_20000
+    git checkout exp/armv8m-ipc
     ```
 
     * If above command fails with message below, please follow instruction
@@ -107,15 +107,15 @@ flashed on the platform.
       fatal: detected dubious ownership in repository at '/workspace/bao-baremetal-guest'
       ```
 
-3. Build the application:
+3. Build the first application:
 
     ```bash
-    make clean && make PLATFORM=lpc55s69
+    make clean && make PLATFORM=lpc55s69 GUEST=0
     ```
 
-    Resulting binary can be found at: `build/lpc55s69/baremetal.bin`
+    Resulting binaries can be found at: `build/lpc55s69/`
 
-4. Copy binary to workspace as `vm0.bin`:
+4. Copy vm0 binaries to the workspace:
 
     ```bash
     cd ./build/lpc55s69/
@@ -124,21 +124,15 @@ flashed on the platform.
     cd -
     ```
 
-5. Change branch to `exp/armv8m\_40000` (VM1):
+5. Build the second application:
 
     ```bash
-    git checkout exp/armv8m\_40000
+    make clean && make PLATFORM=lpc55s69 GUEST=1
     ```
 
-6. Build the application:
+    Resulting binaries can be found at: `build/lpc55s69/`
 
-    ```bash
-    make clean && make PLATFORM=lpc55s69
-    ```
-
-    Resulting binary can be found at: `build/lpc55s69/baremetal.bin`
-
-7. Copy binary to workspace as `vm1.bin`:
+6. Copy vm1 binaries to the workspace:
 
     ```bash
     cd ./build/lpc55s69/

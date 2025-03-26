@@ -6,6 +6,10 @@ struct config config = {
      * with inter-partition communication objects in the VM platform definition
      * below using the shared memory object ID, ie, its index in the list.
      */
+    .shmemlist_size = 1,
+    .shmemlist = (struct shmem[]) {
+        [0] = {.base = 0x20017000, .size = 0x1000,}
+    },
     .vmlist_size = 2,
     .vmlist = (struct vm_config[]) {
         {
@@ -41,6 +45,16 @@ struct config config = {
                         .size = 0x2000,
                     },
                 },
+                .ipc_num = 1,
+                .ipcs = (struct ipc[]) {
+                    {
+                        .base = 0x20017000,
+                        .size = 0x1000,
+                        .shmem_id = 0,
+                        .interrupt_num = 1,
+                        .interrupts = (irqid_t[]) {78}
+                    }
+                },
             },
         },
         {
@@ -75,6 +89,16 @@ struct config config = {
                         .va = 0x40000000,
                         .size = 0x2000,
                     },
+                },
+                .ipc_num = 1,
+                .ipcs = (struct ipc[]) {
+                    {
+                        .base = 0x20017000,
+                        .size = 0x1000,
+                        .shmem_id = 0,
+                        .interrupt_num = 1,
+                        .interrupts = (irqid_t[]) {79}
+                    }
                 },
             },
         },
