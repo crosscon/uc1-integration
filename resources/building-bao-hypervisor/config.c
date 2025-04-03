@@ -31,12 +31,12 @@ struct config config = {
                 .dev_num = 2,
                 .devs =  (struct vm_dev_region[]) {
                     {
-                        /* Flexcomm Interface 2 (USART2) */
-                        .pa = 0x40088000,
-                        .va = 0x40088000,
+                        /* Flexcomm Interface 3 (USART3) */
+                        .pa = 0x40089000,
+                        .va = 0x40089000,
                         .size = 0x1000,
                         .interrupt_num = 1,
-                        .interrupts = (irqid_t[]) {16+16}
+                        .interrupts = (irqid_t[]) {17+16}
                     },
                     {
                         /* SYSCON + IOCON */
@@ -58,36 +58,49 @@ struct config config = {
             },
         },
         {
-            .image = VM_IMAGE_LOADED(0x00040000, 0x00040000, 0xD00),
-            .entry = 0x00040000,
+            /* ZEPHYR VM */
+            .image = VM_IMAGE_LOADED(0x00040000, 0x00040000, 0x8000),
+            .entry = 0x00040c1c,
             .platform = {
                 .cpu_num = 1,
                 .region_num = 2,
                 .regions =  (struct vm_mem_region[]) {
                     {
-                        .base = 0x20030000, //SRAM1
-                        .size = 0x8000
+                        .base = 0x20020000, //SRAM1
+                        .size = 0x10000
                     },
                     {
                         .base = 0x00040000,
                         .size = 0x10000
                     }
                 },
-                .dev_num = 2,
+                .dev_num = 4,
                 .devs =  (struct vm_dev_region[]) {
                     {
-                        /* Flexcomm Interface 3 (USART3) */
-                        .pa = 0x40089000,
-                        .va = 0x40089000,
+                        /* Flexcomm Interface 2 (USART2) */
+                        .pa = 0x40088000,
+                        .va = 0x40088000,
                         .size = 0x1000,
                         .interrupt_num = 1,
-                        .interrupts = (irqid_t[]) {17+16}
+                        .interrupts = (irqid_t[]) {16+16}
                     },
                     {
-                        /* SYSCON + IOCON */
+                        /* SYSCON + IOCON + PINT + SPINT */
                         .pa = 0x40000000,
                         .va = 0x40000000,
-                        .size = 0x2000,
+                        .size = 0x5000,
+                    },
+                    {
+                        /* ANALOG */
+                        .pa = 0x40013000,
+                        .va = 0x40013000,
+                        .size = 0x1000,
+                    },
+                    {
+                        /* POWER MGM */
+                        .pa = 0x40020000,
+                        .va = 0x40020000,
+                        .size = 0x1000,
                     },
                 },
                 .ipc_num = 1,

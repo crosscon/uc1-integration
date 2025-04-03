@@ -22,7 +22,7 @@ flashed on the platform.
 3. Run container shell:
 
     ```bash
-    docker run -it -v .:/workdir/ bao-hypervisor-image bash
+    docker run --rm -it --privileged -v /dev:/dev -v .:/workdir bao-hypervisor-image bash
     ```
 
 4. Create the target directory
@@ -42,7 +42,7 @@ flashed on the platform.
 1. Enter the directory:
 
     ```bash
-    cd bao-hypervisor
+    cd /workdir/bao-hypervisor
     ```
 
 2. Copy `config.c` to `bao-hypervisor/configs/lpc55.c`
@@ -51,10 +51,10 @@ flashed on the platform.
     cp ../resources/building-bao-hypervisor/config.c ./configs/lpc55.c
     ```
 
-3. Change branch in `bao-hypervisor` to `exp/armv8m-sched`:
+3. Change branch in `bao-hypervisor` to `exp/armv8m-ipc`:
 
     ```bash
-    git checkout exp/armv8m-sched
+    git checkout exp/armv8m-ipc
     ```
 
     * If above command fails with message below, please follow instruction
@@ -91,7 +91,7 @@ flashed on the platform.
 1. Enter the `bao-baremetal-guest` directory
 
     ```bash
-    cd bao-baremetal-guest
+    cd /workdir/bao-baremetal-guest
     ```
 
 2. Change branch to `exp/armv8m-ipc`:
@@ -224,3 +224,7 @@ To flash with LinkServer, instead of `.bin`, all 3 `.elf` files are required.
     LinkServer flash LPC55S69:LPCXpresso55S69 load vm0.elf
     LinkServer flash LPC55S69:LPCXpresso55S69 load vm1.elf
     ```
+
+## Next steps
+
+[Running and Debugging](./debugging-bao-crosscon-hv.md)
