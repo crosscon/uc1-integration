@@ -94,10 +94,10 @@ flashed on the platform.
     cd /workdir/bao-baremetal-guest
     ```
 
-2. Change branch to `exp/armv8m-ipc`:
+2. Change branch to `exp/armv8m-zephyr-vm0`:
 
     ```bash
-    git checkout exp/armv8m-ipc
+    git checkout exp/armv8m-zephyr-vm0
     ```
 
     * If above command fails with message below, please follow instruction
@@ -110,7 +110,7 @@ flashed on the platform.
 3. Build the first application:
 
     ```bash
-    make clean && make PLATFORM=lpc55s69 GUEST=0
+    make clean && make PLATFORM=lpc55s69
     ```
 
     Resulting binaries can be found at: `build/lpc55s69/`
@@ -223,6 +223,7 @@ To flash with LinkServer, instead of `.bin`, all 3 `.elf` files are required.
     LinkServer flash LPC55S69:LPCXpresso55S69 load bao.elf
     LinkServer flash LPC55S69:LPCXpresso55S69 load vm0.elf
     LinkServer flash LPC55S69:LPCXpresso55S69 load vm1.elf
+    LinkServer flash LPC55S69:LPCXpresso55S69 load zephyr.elf
     ```
 
 ## Next steps
