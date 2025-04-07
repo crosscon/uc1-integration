@@ -32,5 +32,5 @@ west init -l && west update
 ## Build the application
 
 ```bash
-west build -b lpcxpresso55s69/lpc55s69/cpu0 app --pristine
+west build -b lpcxpresso55s69/lpc55s69/cpu0 --shield mikroe_wifi_bt_click_mikrobus app --pristine
 ```
