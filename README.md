@@ -12,7 +12,20 @@
 ## Initialize Workspace
 
 ```bash
+mkdir workspace
+cd workspace
+git clone ssh://git@git.3mdeb.com:2222/3mdeb/crosscon-uc1-1.git
+git checkout $BRANCH # if testing from branch other than main
+cd crosscon-uc1-1
 west init -l && west update
+```
+
+## Usage
+
+Refer to the `uc1.sh` for details.
+
+```bash
+./uc1.sh build && ./uc1.sh flash && ./uc1.sh hv_start
 ```
 
 ## Configure the WiFi network
