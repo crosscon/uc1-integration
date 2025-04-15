@@ -8,10 +8,13 @@ manifest:
   remotes:
     - name: upstream
       url-base: https://github.com/zephyrproject-rtos
+    - name: 3mdeb
+      url-base: https://github.com/3mdeb
 
   projects:
     - name: zephyr
-      revision: v4.0.0
+      remote: 3mdeb
+      revision: 98b99885cdc47d75ca96e0e49bc18c401c253f9d
       path: zephyr
       west-commands: scripts/west-commands.yml
 
@@ -26,3 +29,21 @@ manifest:
       path: modules/hal/cmsis
       groups:
         - hal
+
+    - name: trusted-firmware-m
+      revision: 8134106ef9cb3df60e8bd22b172532558e936bd2
+      path: modules/tee/tf-m/trusted-firmware-m
+      groups:
+        - tee
+
+    - name: mbedtls
+      revision: a78176c6ff0733ba08018cba4447bd3f20de7978
+      path: modules/crypto/mbedtls
+      groups:
+        - crypto
+
+    - name: mcuboot
+      revision: f74b77cf7808919837c0ed14c2ead3918c546349
+      path: bootloader/mcuboot
+      groups:
+        - bootloader
