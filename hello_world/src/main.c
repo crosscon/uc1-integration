@@ -8,7 +8,7 @@
 
 int main(void)
 {
-	printf("Hello World! %s\n", CONFIG_BOARD_TARGET);
+	printf("Hello World from Zephyr VM running on CROSSCON HV!\n");
 
 	return 0;
 }
