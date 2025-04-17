@@ -59,7 +59,7 @@ struct config config = {
         },
         {
             /* ZEPHYR VM */
-            .image = VM_IMAGE_LOADED(0x00040000, 0x00040000, 0x8000),
+            .image = VM_IMAGE_LOADED(0x00040000, 0x00040000, 0xF000),
             .entry = @@ZEPHYR_VM_ENTRY@@,
             .platform = {
                 .cpu_num = 1,
@@ -90,16 +90,16 @@ struct config config = {
                         .va = 0x40000000,
                         .size = 0x5000,
                     },
-                    {
-                        /* ANALOG */
+                    { 
+                        /* ANALOG + POWER MGM  */
                         .pa = 0x40013000,
                         .va = 0x40013000,
-                        .size = 0x1000,
-                    },
+                        .size = 0xE000,
+                    }, 
                     {
-                        /* POWER MGM */
-                        .pa = 0x40020000,
-                        .va = 0x40020000,
+                        /* RNG */
+                        .pa = 0x4003a000,
+                        .va = 0x4003a000,
                         .size = 0x1000,
                     },
                 },
