@@ -141,12 +141,8 @@ This section covers flashing our built application onto the board.
 1. Flash the board:
 
     ```bash
-      lpc55 write-flash -a 32768 </path/to/zephyr.bin>
+      lpc55 write-flash </path/to/zephyr.bin>
     ```
-
-Note: the memory address `32768` can be found in the
-[the memory table](https://docs.zephyrproject.org/latest/boards/nxp/lpcxpresso55s69/doc/index.html#memory-mappings)
-for this board as hexadecimal value: `0x00008000`.
 
 **At this point, the board should be successfully flashed with our image.**
 
