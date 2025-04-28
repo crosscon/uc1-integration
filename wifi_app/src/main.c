@@ -159,6 +159,7 @@ static int connect_to_wifi(void) {
 }
 
 int main(void) {
+  LOG_INF("Hello in WiFi App!");
   net_mgmt_init_event_callback(&cb, wifi_event_handler, NET_EVENT_WIFI_MASK);
   net_mgmt_add_event_callback(&cb);
 
