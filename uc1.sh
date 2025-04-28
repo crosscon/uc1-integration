@@ -90,7 +90,8 @@ build_hv() {
 
   export DOCKER_IMAGE="bao-hypervisor-image"
   if pushd "${HV_DIR}" &> /dev/null; then
-    cp "${RESOURCES_DIR}/config.c" "${HV_DIR}/configs/lpc55.c"
+    # cp "${RESOURCES_DIR}/config.c" "${HV_DIR}/configs/lpc55.c"
+    cp "${RESOURCES_DIR}/config_single_vm_zephyr.c" "${HV_DIR}/configs/lpc55.c"
     sed -i "${HV_DIR}/configs/lpc55.c" -e "s/@@ZEPHYR_VM_ENTRY@@/${VM1_START}/" 
     docker_run make clean
     docker_run make PLATFORM=lpc55s69 CONFIG=lpc55 DEBUG=y
