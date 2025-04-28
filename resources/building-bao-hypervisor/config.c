@@ -71,7 +71,7 @@ struct config config = {
                     },
                     {
                         .base = 0x00040000,
-                        .size = 0x20000
+                        .size = 0x18000
                     }
                 },
                 .dev_num = 4,
