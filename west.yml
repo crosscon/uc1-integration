@@ -14,7 +14,7 @@ manifest:
   projects:
     - name: zephyr
       remote: 3mdeb
-      revision: 98b99885cdc47d75ca96e0e49bc18c401c253f9d
+      revision: f352f026f1546464bea9a1162e48824052f971cb
       path: zephyr
       west-commands: scripts/west-commands.yml
 
