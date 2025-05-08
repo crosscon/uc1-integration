@@ -26,6 +26,18 @@ export HV_CONFIG="two_bm_zephyr"
 ./uc1.sh build && ./uc1.sh flash && ./uc1.sh hv_start
 ```
 
+Default `USART` assignment:
+- `USART0` - hypervisor
+- `USART2` - Zephyr
+- `USART3` - bare-metal app
+
+> **Note:**
+> `wifi_app` will need `USART2` for communication with WiFi module. An
+> alternative Zephyr code using `USART3` as Zephyr console for debugging
+> capabilities of this app is available
+> [here](https://github.com/3mdeb/zephyr/tree/bao-ipc-flexcomm3-usart).
+> This can be selected in `west.yml` file.
+
 ## Configure the WiFi network
 
 1. Go to `app/src/main.c`

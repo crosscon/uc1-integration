@@ -14,7 +14,11 @@ manifest:
   projects:
     - name: zephyr
       remote: 3mdeb
-      revision: f352f026f1546464bea9a1162e48824052f971cb
+      # Use this revision for USART3 as Zephyr console
+      # revision: f352f026f1546464bea9a1162e48824052f971cb
+      #
+      # Use this revision for USART2 as Zephyr console
+      revision: 98b99885cdc47d75ca96e0e49bc18c401c253f9d
       path: zephyr
       west-commands: scripts/west-commands.yml
 
