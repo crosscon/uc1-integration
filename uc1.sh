@@ -34,6 +34,17 @@ This is wrapper for building/flashing/running UC1 stages
     flash         flash HV and VMs
     hv_start      start HV via GDB (HV still cannot boot by itself?) 
     gdb_start     start GDB session with no extra commands
+
+  Environment variables:
+    ZEPHYR_APP    name of the Zephyr app to be included in Zephyr VM:
+                    - hello_world - simple hello world app,
+                    - timer_test - test timer (related to: https://github.com/crosscon/CROSSCON-Hypervisor-and-TEE-Isolation-Demos/issues/22),
+                    - wifi_app - WiFi module support on USART2 (WiFi does not work yet)
+    HV_CONFIG    hypervisor configuration to be used:
+                   - single_bm - single VM running default bare-metal app
+                   - single_zephyr - single VM running zephyr app selected by ZEPHYR_APP
+                   - two_bm_zephyr - two VMs (VM0 - bare-metal, VM1 - Zephyr)
+
 EOF
   exit 0
 }
@@ -55,15 +66,21 @@ docker_run() {
 build_zephyr() {
   export DOCKER_IMAGE="ghcr.io/zephyrproject-rtos/zephyr-build:v0.27.5"
   if pushd "${ZEPHYR_WORKSPACE}" &> /dev/null; then
-    # TODO: add script argument/env variable for this
-    #
-    # Uncomment one of these to select which Zephyr app should be built as a VM
-    # WIFI APP with shield
-    docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns --shield mikroe_wifi_bt_click_mikrobus ./crosscon-uc1-1/wifi_app/ -p
-    # Hello world from our repo
-    # docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns ./crosscon-uc1-1/hello_world/ -p
-    # Hello world from Zephyr repo
-    # docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns zephyr/samples/hello_world -p
+    case "${ZEPHYR_APP}" in
+      "hello_world")
+        docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns ./crosscon-uc1-1/hello_world/ -p
+        ;;
+      "timer_test")
+        docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns ./crosscon-uc1-1/timer_test -p
+        ;;
+      "wifi_app")
+        docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns --shield mikroe_wifi_bt_click_mikrobus ./crosscon-uc1-1/wifi_app/ -p
+        ;;
+      *)
+        echo "Unsupported ZEPHYR_APP: \"${ZEPHYR_APP}\""
+        usage
+        ;;
+    esac
     cp "build/zephyr/zephyr.bin" "${OUT_DIR}/vm1.bin"
     cp "build/zephyr/zephyr.elf" "${OUT_DIR}/vm1.elf"
     export VM1_START=$(printf "0x%08x\n" $((0x$(nm build/zephyr/zephyr.elf | awk '/__start/ {print $1}') - 1)))
@@ -90,8 +107,21 @@ build_hv() {
 
   export DOCKER_IMAGE="bao-hypervisor-image"
   if pushd "${HV_DIR}" &> /dev/null; then
-    # cp "${RESOURCES_DIR}/config.c" "${HV_DIR}/configs/lpc55.c"
-    cp "${RESOURCES_DIR}/config_single_vm_zephyr.c" "${HV_DIR}/configs/lpc55.c"
+    case "${HV_CONFIG}" in
+      "single_bm")
+        cp "${RESOURCES_DIR}/config_single_vm_bm.c" "${HV_DIR}/configs/lpc55.c"
+        ;;
+      "single_zephyr")
+        cp "${RESOURCES_DIR}/config_single_vm_zephyr.c" "${HV_DIR}/configs/lpc55.c"
+        ;;
+      "two_bm_zephyr")
+        cp "${RESOURCES_DIR}/config.c" "${HV_DIR}/configs/lpc55.c"
+        ;;
+      *)
+        echo "Unsupported ZEPHYR_APP: \"${ZEPHYR_APP}\""
+        usage
+        ;;
+    esac
     sed -i "${HV_DIR}/configs/lpc55.c" -e "s/@@ZEPHYR_VM_ENTRY@@/${VM1_START}/" 
     docker_run make clean
     docker_run make PLATFORM=lpc55s69 CONFIG=lpc55 DEBUG=y
@@ -122,6 +152,9 @@ hv_start() {
   docker_run ./hv_start.sh
   export -n DOCKER_IMAGE
 }
+
+[ -z "${ZEPHYR_APP}" ] && usage
+[ -z "${HV_CONFIG}" ] && usage
 
 CMD="$1"
 

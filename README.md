@@ -2,19 +2,15 @@
 
 ## Prepare the Environment
 
-- Follow [Zephyr Getting
-  Started](https://docs.zephyrproject.org/latest/develop/getting_started/installation_linux.html#installation-linux)
-- Install [Zephyr
-  SDK](https://docs.zephyrproject.org/latest/develop/toolchains/zephyr_sdk.html#install-zephyr-sdk-on-linux)
-- Install
-  [west](https://docs.zephyrproject.org/latest/develop/west/install.html)
+- Install [docker](https://docs.docker.com/engine/install/fedora/)
+- Install [west](https://docs.zephyrproject.org/latest/develop/west/install.html)
 
 ## Initialize Workspace
 
 ```bash
 mkdir workspace
 cd workspace
-git clone ssh://git@git.3mdeb.com:2222/3mdeb/crosscon-uc1-1.git
+git clone https://github.com/crosscon/uc1-integration
 git checkout $BRANCH # if testing from branch other than main
 cd crosscon-uc1-1
 west init -l && west update
@@ -25,6 +21,8 @@ west init -l && west update
 Refer to the `uc1.sh` for details.
 
 ```bash
+export ZEPHYR_APP="timer_test"
+export HV_CONFIG="two_bm_zephyr"
 ./uc1.sh build && ./uc1.sh flash && ./uc1.sh hv_start
 ```
 
@@ -41,9 +39,3 @@ Refer to the `uc1.sh` for details.
     Set the values to actual SSID and password of the target wifi network.
 
 3. Save the file.
-
-## Build the application
-
-```bash
-west build -b lpcxpresso55s69/lpc55s69/cpu0 --shield mikroe_wifi_bt_click_mikrobus app --pristine
-```
