@@ -68,13 +68,13 @@ build_zephyr() {
   if pushd "${ZEPHYR_WORKSPACE}" &> /dev/null; then
     case "${ZEPHYR_APP}" in
       "hello_world")
-        docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns ./crosscon-uc1-1/hello_world/ -p
+        docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns ./uc1-integration/hello_world/ -p
         ;;
       "timer_test")
-        docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns ./crosscon-uc1-1/timer_test -p
+        docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns ./uc1-integration/timer_test -p
         ;;
       "wifi_app")
-        docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns --shield mikroe_wifi_bt_click_mikrobus ./crosscon-uc1-1/wifi_app/ -p
+        docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/wifi_app/ -p
         ;;
       *)
         echo "Unsupported ZEPHYR_APP: \"${ZEPHYR_APP}\""
