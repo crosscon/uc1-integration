@@ -34,12 +34,15 @@ This is wrapper for building/flashing/running UC1 stages
     flash         flash HV and VMs
     hv_start      start HV via GDB (HV still cannot boot by itself?) 
     gdb_start     start GDB session with no extra commands
+    no_hv_zephyr  build and flash ZEPHYR_APP as bare-metal (no hypervisor) - useful for debugging and comparing
 
   Environment variables:
     ZEPHYR_APP    name of the Zephyr app to be included in Zephyr VM:
                     - hello_world - simple hello world app,
-                    - timer_test - test timer (related to: https://github.com/crosscon/CROSSCON-Hypervisor-and-TEE-Isolation-Demos/issues/22),
-                    - wifi_app - WiFi module support on USART2 (WiFi does not work yet)
+                    - hello_at    - simple app sending AT command to modem and receiving response, useful to verify basic communication with modem,
+                    - echo_bot    - echo over main console, based on echo_bot from samples, useful to verify UART RX & IRQ,
+                    - timer_test  - test timer (related to: https://github.com/crosscon/CROSSCON-Hypervisor-and-TEE-Isolation-Demos/issues/22),
+                    - wifi_app    - WiFi module support on USART2 (WiFi does not work yet)
     HV_CONFIG    hypervisor configuration to be used:
                    - single_bm - single VM running default bare-metal app
                    - single_zephyr - single VM running zephyr app selected by ZEPHYR_APP
@@ -68,13 +71,19 @@ build_zephyr() {
   if pushd "${ZEPHYR_WORKSPACE}" &> /dev/null; then
     case "${ZEPHYR_APP}" in
       "hello_world")
-        docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns ./uc1-integration/hello_world/ -p
+        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/hello_world/ -p
+        ;;
+      "hello_at")
+        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/hello_at/ -p
+        ;;
+      "echo_bot")
+        docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/echo_bot/ -p
         ;;
       "timer_test")
-        docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns ./uc1-integration/timer_test -p
+        docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/timer_test -p
         ;;
       "wifi_app")
-        docker_run west build -b lpcxpresso55s69/lpc55s69/cpu0/ns --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/wifi_app/ -p
+        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/wifi_app/ -p
         ;;
       *)
         echo "Unsupported ZEPHYR_APP: \"${ZEPHYR_APP}\""
@@ -153,6 +162,34 @@ hv_start() {
   export -n DOCKER_IMAGE
 }
 
+no_hv_flash() {
+  local _zephyr_bin="${OUT_DIR}/vm1.bin"
+
+  which lpc55 &> /dev/null
+  errorCheck "Make sure to install https://github.com/lpc55/lpc55-host into PATH"
+
+  echo "Waiting for device to enter bootloader mode..."
+  echo "Press and hold ISP, then press RESET on your LPC55 board."
+  echo "Make sure that udev rules are installed if it does not work!"
+  echo "https://spsdk.readthedocs.io/en/latest/examples/_knowledge_base/installation_guide.html#usb-under-linux"
+
+  while true; do
+      OUTPUT=$(lpc55 ls)
+      if echo "$OUTPUT" | grep -Eq 'Bootloader\s+\{.*vid:.*pid:.*uuid:.*\}'; then
+          echo "Bootloader detected:"
+          echo "$OUTPUT" | grep -E 'Bootloader\s+\{.*vid:.*pid:.*uuid:.*\}'
+          break
+      fi
+      sleep 1
+  done
+
+  echo "Flashing  ${_zephyr_bin} ..."
+  lpc55 write-flash "${_zephyr_bin}"
+  errorCheck "Flashing failed"
+
+  echo "Press RESET button to start the firmware"
+}
+
 [ -z "${ZEPHYR_APP}" ] && usage
 [ -z "${HV_CONFIG}" ] && usage
 
@@ -169,15 +206,22 @@ case "$CMD" in
     gdb_start
     ;;
   "build")
+    export ZEPHYR_TARGET="lpcxpresso55s69/lpc55s69/cpu0/ns"
     rm -rf "${OUT_DIR}"
     mkdir -p "${OUT_DIR}"
     build_zephyr
     build_bm
     build_hv
     ;;
+  "no_hv_zephyr")
+    export ZEPHYR_TARGET="lpcxpresso55s69/lpc55s69/cpu0"
+    rm -rf "${OUT_DIR}"
+    mkdir -p "${OUT_DIR}"
+    build_zephyr
+    no_hv_flash
+    ;;
   *)
     echo "Invalid command: \"${CMD}\""
     usage
     ;;
 esac
-
