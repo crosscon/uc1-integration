@@ -4,3 +4,6 @@
 [submodule "bao-baremetal-guest"]
 	path = bao-baremetal-guest
 	url = https://github.com/3mdeb/bao-baremetal-guest.git
+[submodule "CROSSCON-Hypervisor"]
+	path = CROSSCON-Hypervisor
+	url = https://github.com/crosscon/CROSSCON-Hypervisor.git

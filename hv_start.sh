@@ -13,7 +13,7 @@ GDBSERVER_PID=$!
 sleep 3
 
 # Run GDB commands non-interactively
-arm-none-eabi-gdb out/bao.elf \
+arm-none-eabi-gdb out/crossconhyp.elf \
   -ex "target remote :3333" \
   -ex "set \$pc=_reset_handler" \
   -ex "continue" \

@@ -6,7 +6,7 @@ RESOURCES_DIR="${ROOT_DIR}/resources/building-bao-hypervisor"
 ZEPHYR_WORKSPACE="${ROOT_DIR}/../"
 
 BM_DIR="${ROOT_DIR}/bao-baremetal-guest"
-HV_DIR="${ROOT_DIR}/bao-hypervisor"
+HV_DIR="${ROOT_DIR}/CROSSCON-Hypervisor"
 
 DOCKER_IMAGE_BAO="bao-hypervisor-image"
 
@@ -134,8 +134,8 @@ build_hv() {
     sed -i "${HV_DIR}/configs/lpc55.c" -e "s/@@ZEPHYR_VM_ENTRY@@/${VM1_START}/" 
     docker_run make clean
     docker_run make PLATFORM=lpc55s69 CONFIG=lpc55 DEBUG=y
-    cp "${HV_DIR}/bin/lpc55s69/lpc55/bao.bin" "${OUT_DIR}"
-    cp "${HV_DIR}/bin/lpc55s69/lpc55/bao.elf" "${OUT_DIR}"
+    cp "${HV_DIR}/bin/lpc55s69/lpc55/crossconhyp.bin" "${OUT_DIR}"
+    cp "${HV_DIR}/bin/lpc55s69/lpc55/crossconhyp.elf" "${OUT_DIR}"
     popd &> /dev/null
   fi
   export -n DOCKER_IMAGE
@@ -144,7 +144,7 @@ build_hv() {
 
 flash() {
   export DOCKER_IMAGE="bao-hypervisor-image"
-  docker_run LinkServer flash LPC55S69:LPCXpresso55S69 load ${OUT_DIR}/bao.elf
+  docker_run LinkServer flash LPC55S69:LPCXpresso55S69 load ${OUT_DIR}/crossconhyp.elf
   docker_run LinkServer flash LPC55S69:LPCXpresso55S69 load ${OUT_DIR}/vm0.elf
   docker_run LinkServer flash LPC55S69:LPCXpresso55S69 load ${OUT_DIR}/vm1.elf
   export -n DOCKER_IMAGE
