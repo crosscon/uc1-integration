@@ -1,6 +1,3 @@
-[submodule "bao-hypervisor"]
-	path = bao-hypervisor
-	url = https://github.com/3mdeb/bao-hypervisor.git
 [submodule "bao-baremetal-guest"]
 	path = bao-baremetal-guest
 	url = https://github.com/3mdeb/bao-baremetal-guest.git
