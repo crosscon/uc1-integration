@@ -73,7 +73,7 @@ build_zephyr() {
   if pushd "${ZEPHYR_WORKSPACE}" &> /dev/null; then
     case "${ZEPHYR_APP}" in
       "hello_world")
-        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/hello_world_vm0/ -p
+        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/hello_world/ -p
         ;;
       "hello_at")
         docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/hello_at/ -p
@@ -117,13 +117,13 @@ build_bm() {
 build_puf_vms() {
   export DOCKER_IMAGE="ghcr.io/zephyrproject-rtos/zephyr-build:v0.27.5"
   if pushd "${ZEPHYR_WORKSPACE}" &> /dev/null; then
-    docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/hello_world_vm0 -p
+    docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/puf_vm0/application -p
     cp "build/zephyr/zephyr.bin" "${OUT_DIR}/vm0.bin"
     cp "build/zephyr/zephyr.elf" "${OUT_DIR}/vm0.elf"
     export VM0_START=$(printf "0x%08x\n" $((0x$(nm build/zephyr/zephyr.elf | awk '/__start/ {print $1}') - 1)))
     echo "VM0_START extracted from zephyr.elf: ${VM0_START}"
 
-    docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/hello_world_vm1 -p
+    docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/puf_vm1/application -p
     cp "build/zephyr/zephyr.bin" "${OUT_DIR}/vm1.bin"
     cp "build/zephyr/zephyr.elf" "${OUT_DIR}/vm1.elf"
     export VM1_START=$(printf "0x%08x\n" $((0x$(nm build/zephyr/zephyr.elf | awk '/__start/ {print $1}') - 1)))
