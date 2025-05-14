@@ -30,7 +30,8 @@ Usage: ./$(basename ${0}) command [options]
 This is wrapper for building/flashing/running UC1 stages
 
   Commands:
-    build         build HV and VMs
+    build         build HV and VMs: VM0 (bare-metal), VM1 (ZEPHYR_APP) - target more useful for testing
+    build_puf     build HV and VMs: VM0 (Zephyr VM0), VM1 (Zephyr VM1) - default target for UC1.1 integration
     flash         flash HV and VMs
     hv_start      start HV via GDB (HV still cannot boot by itself?) 
     gdb_start     start GDB session with no extra commands
@@ -43,7 +44,7 @@ This is wrapper for building/flashing/running UC1 stages
                     - echo_bot    - echo over main console, based on echo_bot from samples, useful to verify UART RX & IRQ,
                     - timer_test  - test timer (related to: https://github.com/crosscon/CROSSCON-Hypervisor-and-TEE-Isolation-Demos/issues/22),
                     - wifi_app    - WiFi module support on USART2 (WiFi does not work yet)
-    HV_CONFIG    hypervisor configuration to be used:
+    HV_CONFIG    hypervisor configuration to be used when using "build" (not "build_puf") command:
                    - single_bm - single VM running default bare-metal app
                    - single_zephyr - single VM running zephyr app selected by ZEPHYR_APP
                    - two_bm_zephyr - two VMs (VM0 - bare-metal, VM1 - Zephyr)
@@ -67,11 +68,12 @@ docker_run() {
 }
 
 build_zephyr() {
+  [ -z "${ZEPHYR_APP}" ] && usage
   export DOCKER_IMAGE="ghcr.io/zephyrproject-rtos/zephyr-build:v0.27.5"
   if pushd "${ZEPHYR_WORKSPACE}" &> /dev/null; then
     case "${ZEPHYR_APP}" in
       "hello_world")
-        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/hello_world/ -p
+        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/hello_world_vm0/ -p
         ;;
       "hello_at")
         docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/hello_at/ -p
@@ -93,6 +95,7 @@ build_zephyr() {
     cp "build/zephyr/zephyr.bin" "${OUT_DIR}/vm1.bin"
     cp "build/zephyr/zephyr.elf" "${OUT_DIR}/vm1.elf"
     export VM1_START=$(printf "0x%08x\n" $((0x$(nm build/zephyr/zephyr.elf | awk '/__start/ {print $1}') - 1)))
+    export VM0_START=$(printf "0x%08x\n" $((0x$(nm build/zephyr/zephyr.elf | awk '/__start/ {print $1}') - 1)))
     echo "VM1_START extracted from zephyr.elf: ${VM1_START}"
     popd &> /dev/null
   fi
@@ -111,7 +114,28 @@ build_bm() {
   export -n DOCKER_IMAGE
 }
 
+build_puf_vms() {
+  export DOCKER_IMAGE="ghcr.io/zephyrproject-rtos/zephyr-build:v0.27.5"
+  if pushd "${ZEPHYR_WORKSPACE}" &> /dev/null; then
+    docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/hello_world_vm0 -p
+    cp "build/zephyr/zephyr.bin" "${OUT_DIR}/vm0.bin"
+    cp "build/zephyr/zephyr.elf" "${OUT_DIR}/vm0.elf"
+    export VM0_START=$(printf "0x%08x\n" $((0x$(nm build/zephyr/zephyr.elf | awk '/__start/ {print $1}') - 1)))
+    echo "VM0_START extracted from zephyr.elf: ${VM0_START}"
+
+    docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/hello_world_vm1 -p
+    cp "build/zephyr/zephyr.bin" "${OUT_DIR}/vm1.bin"
+    cp "build/zephyr/zephyr.elf" "${OUT_DIR}/vm1.elf"
+    export VM1_START=$(printf "0x%08x\n" $((0x$(nm build/zephyr/zephyr.elf | awk '/__start/ {print $1}') - 1)))
+    echo "VM1_START extracted from zephyr.elf: ${VM1_START}"
+
+    popd &> /dev/null
+  fi
+  export -n DOCKER_IMAGE
+}
+
 build_hv() {
+  [ -z "${HV_CONFIG}" ] && usage
   [ -z "${VM1_START}" ] && errorExit "VM1_START not set, build Zephyr first to retrieve it"
 
   export DOCKER_IMAGE="bao-hypervisor-image"
@@ -127,11 +151,12 @@ build_hv() {
         cp "${RESOURCES_DIR}/config.c" "${HV_DIR}/configs/lpc55.c"
         ;;
       *)
-        echo "Unsupported ZEPHYR_APP: \"${ZEPHYR_APP}\""
-        usage
+        cp "${RESOURCES_DIR}/${HV_CONFIG}.c" "${HV_DIR}/configs/lpc55.c"
         ;;
     esac
-    sed -i "${HV_DIR}/configs/lpc55.c" -e "s/@@ZEPHYR_VM_ENTRY@@/${VM1_START}/" 
+    # If VM0 is also Zephyr, replace entrypoint as well
+    sed -i "${HV_DIR}/configs/lpc55.c" -e "s/@@ZEPHYR_VM0_ENTRY@@/${VM0_START}/"
+    sed -i "${HV_DIR}/configs/lpc55.c" -e "s/@@ZEPHYR_VM1_ENTRY@@/${VM1_START}/"
     docker_run make clean
     docker_run make PLATFORM=lpc55s69 CONFIG=lpc55 DEBUG=y
     cp "${HV_DIR}/bin/lpc55s69/lpc55/crossconhyp.bin" "${OUT_DIR}"
@@ -140,6 +165,7 @@ build_hv() {
   fi
   export -n DOCKER_IMAGE
   export -n VM1_START
+  export -n VM0_START
 }
 
 flash() {
@@ -190,9 +216,6 @@ no_hv_flash() {
   echo "Press RESET button to start the firmware"
 }
 
-[ -z "${ZEPHYR_APP}" ] && usage
-[ -z "${HV_CONFIG}" ] && usage
-
 CMD="$1"
 
 case "$CMD" in
@@ -211,6 +234,14 @@ case "$CMD" in
     mkdir -p "${OUT_DIR}"
     build_zephyr
     build_bm
+    build_hv
+    ;;
+  "build_puf")
+    export ZEPHYR_TARGET="lpcxpresso55s69/lpc55s69/cpu0/ns"
+    export HV_CONFIG="puf_integration_without_wifi"
+    rm -rf "${OUT_DIR}"
+    mkdir -p "${OUT_DIR}"
+    build_puf_vms
     build_hv
     ;;
   "no_hv_zephyr")

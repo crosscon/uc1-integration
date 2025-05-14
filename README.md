@@ -19,7 +19,26 @@ west init -l && west update
 
 ## Usage
 
-Refer to the `uc1.sh` for details.
+Refer to the `uc1.sh` for details of available options. Some useful scenarios
+are described below.
+
+Default `USART` assignment:
+- `USART0` - hypervisor
+- `USART2` - VM1 (Zephyr)
+- `USART3` - VM0 (bare-metal app, or Zephyr in PUF integration)
+
+> **Note:**
+> By default Zephyr uses USART2 for console output. It can be changed to UART3
+> via overlay in app directory. Refer to the `hello_world_vm0` or `wifi_app`
+> apps.
+
+### UC1.1 integration
+
+```bash
+/uc1.sh build_puf && ./uc1.sh flash && ./uc1.sh hv_start
+```
+
+### Bare-metal + Zephyr VMs
 
 ```bash
 export ZEPHYR_APP="timer_test"
@@ -27,17 +46,20 @@ export HV_CONFIG="two_bm_zephyr"
 ./uc1.sh build && ./uc1.sh flash && ./uc1.sh hv_start
 ```
 
-Default `USART` assignment:
-- `USART0` - hypervisor
-- `USART2` - Zephyr
-- `USART3` - bare-metal app
+### Single VM
 
-> **Note:**
-> `wifi_app` will need `USART2` for communication with WiFi module. An
-> alternative Zephyr code using `USART3` as Zephyr console for debugging
-> capabilities of this app is available
-> [here](https://github.com/3mdeb/zephyr/tree/bao-ipc-flexcomm3-usart).
-> This can be selected in `west.yml` file.
+```bash
+export ZEPHYR_APP="wifi_app"
+export HV_CONFIG="single_zephyr"
+./uc1.sh build && ./uc1.sh flash && ./uc1.sh hv_start
+```
+
+### Bare-metal Zephyr app (without HV)
+
+```bash
+export ZEPHYR_APP="wifi_app"
+./uc1.sh no_hv_zephyr
+```
 
 ## Configure the WiFi network
 
