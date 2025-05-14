@@ -1,19 +1,19 @@
 #include <config.h>
 
 struct vm_config zephyr = {
-    .image = VM_IMAGE_LOADED(0x00040000, 0x00040000, 0xF000),
-    .entry = @@ZEPHYR_VM_ENTRY@@,
+    .image = VM_IMAGE_LOADED(0x00048000, 0x00048000, 0xF000),
+    .entry = @@ZEPHYR_VM1_ENTRY@@,
     .platform = {
         .cpu_num = 1,
         .region_num = 2,
         .regions =  (struct vm_mem_region[]) {
             {
-                .base = 0x20020000, //SRAM1
+                .base = 0x20030000, //SRAM1
                 .size = 0x10000
             },
             {
-                .base = 0x00040000,
-                .size = 0x18000
+                .base = 0x00048000,
+                .size = 0x28000
             }
         },
         .dev_num = 4,
