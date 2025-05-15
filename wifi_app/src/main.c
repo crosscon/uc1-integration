@@ -34,8 +34,7 @@ static struct net_mgmt_event_callback mgmt_cb;
 static struct net_dhcpv4_option_callback dhcp_cb;
 
 /* Wi-Fi Configuration */
-#define WIFI_SSID "rpi3-hotspot"
-#define WIFI_PASSWORD "rpi3-pass"
+#include "wifi_config.h"
 #define WIFI_SECURITY_TYPE WIFI_SECURITY_TYPE_PSK
 
 #define NET_EVENT_WIFI_MASK                                                    \

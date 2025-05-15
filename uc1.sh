@@ -72,24 +72,8 @@ build_zephyr() {
   export DOCKER_IMAGE="ghcr.io/zephyrproject-rtos/zephyr-build:v0.27.5"
   if pushd "${ZEPHYR_WORKSPACE}" &> /dev/null; then
     case "${ZEPHYR_APP}" in
-      "hello_world")
-        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/hello_world_vm0/ -p
-        ;;
-      "hello_at")
-        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/hello_at/ -p
-        ;;
-      "echo_bot")
-        docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/echo_bot/ -p
-        ;;
-      "timer_test")
-        docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/timer_test -p
-        ;;
-      "wifi_app")
-        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/wifi_app/ -p
-        ;;
       *)
-        echo "Unsupported ZEPHYR_APP: \"${ZEPHYR_APP}\""
-        usage
+        docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/${ZEPHYR_APP} -p
         ;;
     esac
     cp "build/zephyr/zephyr.bin" "${OUT_DIR}/vm1.bin"
