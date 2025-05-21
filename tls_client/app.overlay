@@ -1,0 +1,25 @@
+/ {
+	aliases{
+		usart-0 = &flexcomm3;
+	};
+
+	chosen {
+		zephyr,console = &flexcomm3;
+		zephyr,shell-uart = &flexcomm3;
+		zephyr,uart-mcumgr = &flexcomm3;
+	};
+};
+
+&flexcomm3 {
+	status = "okay";
+};
+
+&flexcomm2 {
+	status = "okay";
+	current-speed = <115200>;
+
+	mikroe_wifi_bt_click {
+		compatible = "espressif,esp-at";
+		status = "okay";
+	};
+};
