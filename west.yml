@@ -10,6 +10,8 @@ manifest:
       url-base: https://github.com/zephyrproject-rtos
     - name: 3mdeb
       url-base: https://github.com/3mdeb
+    - name: wolfssl
+      url-base: https://github.com/wolfssl
 
   projects:
     - name: zephyr
@@ -47,3 +49,8 @@ manifest:
       path: bootloader/mcuboot
       groups:
         - bootloader
+
+    - name: wolfssl
+      path: modules/crypto/wolfssl
+      revision: 3ca444e0e126190dcfbaf522037b09f09e47463d
+      remote: wolfssl

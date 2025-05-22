@@ -28,6 +28,16 @@ LOG_MODULE_REGISTER(MAIN);
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/socket.h>
 
+/* SSL */
+#ifndef WOLFSSL_USER_SETTINGS
+    #include <wolfssl/options.h>
+#endif
+#include <wolfssl/ssl.h>
+#define USE_CERT_BUFFERS_2048
+#include <wolfssl/certs_test.h>
+#include <wolfssl/test.h>
+#define DEBUG_WOLFSSL 1
+
 #define DHCP_OPTION_NTP (42)
 #define MACSTR "%02X:%02X:%02X:%02X:%02X:%02X"
 
@@ -46,6 +56,11 @@ static int test_socket_connection(void) {
   struct sockaddr_in servAddr; 
   int ret;
   int sock;
+
+  /* declare wolfSSL objects */
+  WOLFSSL_CTX* ctx;
+  WOLFSSL*     ssl;
+  WOLFSSL_CIPHER* cipher;
 
   LOG_INF("Creating socket...");
 
@@ -71,7 +86,28 @@ static int test_socket_connection(void) {
 	  ret = -1; 
 	}
 
+
+  /*---------------------------------*/
+  /* Start of wolfSSL initialization and configuration */
+  /*---------------------------------*/
+  /* Initialize wolfSSL */
+  if ((ret = wolfSSL_Init()) != WOLFSSL_SUCCESS) {
+      fprintf(stderr, "ERROR: Failed to initialize the library\n");
+      goto socket_cleanup;
+  }
+
 	return ret;
+
+  /* Cleanup and return */
+//cleanup:
+//  wolfSSL_free(ssl);      /* Free the wolfSSL object                  */
+//ctx_cleanup:
+//  wolfSSL_CTX_free(ctx);  /* Free the wolfSSL context object          */
+//  wolfSSL_Cleanup();      /* Cleanup the wolfSSL environment          */
+socket_cleanup:
+  close(sock)    ;          /* Close the connection to the server       */
+end:
+  return ret;               /* Return reporting a success               */
 }
 
 /*********** Socket end ***********/
