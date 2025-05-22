@@ -24,6 +24,10 @@ LOG_MODULE_REGISTER(MAIN);
 #include <zephyr/net/wifi.h>
 #include <zephyr/net/wifi_mgmt.h>
 
+/* socket */
+#include <zephyr/net/net_ip.h>
+#include <zephyr/net/socket.h>
+
 #define DHCP_OPTION_NTP (42)
 #define MACSTR "%02X:%02X:%02X:%02X:%02X:%02X"
 
@@ -32,6 +36,45 @@ static uint8_t ntp_server[4];
 static struct net_mgmt_event_callback mgmt_cb;
 
 static struct net_dhcpv4_option_callback dhcp_cb;
+
+/*********** Socket start ***********/
+
+#define SERVER_ADDR  "192.168.4.113"
+#define SERVER_PORT  11111
+
+static int test_socket_connection(void) {
+  struct sockaddr_in servAddr; 
+  int ret;
+  int sock;
+
+  LOG_INF("Creating socket...");
+
+  /* Create a socket that uses an internet IPv4 address,
+   * Sets the socket to be stream based (TCP) */
+	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+	if (sock < 0) {
+		LOG_ERR("Failed to create HTTP socket (%d)", -errno);
+	}
+
+  LOG_INF("Socket created successfuly");
+
+  /* Initialize the server address struct with zeros */ 
+	memset(&servAddr, 0, sizeof(servAddr));
+
+  /* Fill in the server address */
+  servAddr.sin_family = AF_INET;             /* using IPv4      */
+  servAddr.sin_port   = htons(SERVER_PORT);  /* on SERVER_PORT  */
+
+	if (inet_pton(AF_INET, SERVER_ADDR, &servAddr.sin_addr) != 1) {
+	  LOG_ERR("Invalid server address");
+	  ret = -1; 
+	}
+
+	return ret;
+}
+
+/*********** Socket end ***********/
 
 /* Wi-Fi Configuration */
 #include "wifi_config.h"
@@ -172,6 +215,11 @@ int main(void) {
 
   LOG_INF("Run dhcpv4 client");
   net_if_foreach(start_dhcpv4_client, NULL);
+
+  /* Wait for network to settle */
+  /* TODO: find a better way of ensuring this */
+  sleep(5);
+  test_socket_connection();
 
   return 0;
 }
