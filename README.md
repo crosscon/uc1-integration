@@ -11,8 +11,8 @@
 mkdir workspace
 cd workspace
 git clone https://github.com/crosscon/uc1-integration
-git checkout $BRANCH # if testing from branch other than main
 cd uc1-integration
+git checkout $BRANCH # if testing from branch other than main
 git submodule update --init --recursive
 west init -l && west update
 ```
