@@ -52,5 +52,5 @@ manifest:
 
     - name: wolfssl
       path: modules/crypto/wolfssl
-      revision: 3ca444e0e126190dcfbaf522037b09f09e47463d
+      revision: a1b644202ccb4a577b38bf4e05731ecd7e7651b9
       remote: wolfssl

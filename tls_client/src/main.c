@@ -33,10 +33,8 @@ LOG_MODULE_REGISTER(MAIN);
     #include <wolfssl/options.h>
 #endif
 #include <wolfssl/ssl.h>
-#define USE_CERT_BUFFERS_2048
-#include <wolfssl/certs_test.h>
-#include <wolfssl/test.h>
-#define DEBUG_WOLFSSL 1
+#include "ssl_certs.h"
+#define HEAP_HINT  NULL
 
 #define DHCP_OPTION_NTP (42)
 #define MACSTR "%02X:%02X:%02X:%02X:%02X:%02X"
@@ -49,13 +47,27 @@ static struct net_dhcpv4_option_callback dhcp_cb;
 
 /*********** Socket start ***********/
 
-#define SERVER_ADDR  "192.168.4.113"
+#define SERVER_ADDR  "192.168.66.173"
 #define SERVER_PORT  11111
+
+/* DO NOT use this in production. You should implement a way
+ * to get the current date. */
+static int verifyIgnoreDateError(int preverify, WOLFSSL_X509_STORE_CTX* store)
+{
+    if (store->error == ASN_BEFORE_DATE_E)
+        return 1; /* override error */
+    else
+        return preverify;
+}
 
 static int test_socket_connection(void) {
   struct sockaddr_in servAddr; 
-  int ret;
-  int sock;
+  int                ret;
+  int                sock;
+  char               buff[256];
+  size_t             len;
+  const char msg[] = "Hello from Zephyr!\n";
+  char               wolfsslErrorStr[80];
 
   /* declare wolfSSL objects */
   WOLFSSL_CTX* ctx;
@@ -76,37 +88,159 @@ static int test_socket_connection(void) {
 
   /* Initialize the server address struct with zeros */ 
 	memset(&servAddr, 0, sizeof(servAddr));
+  LOG_INF("memset");
 
   /* Fill in the server address */
   servAddr.sin_family = AF_INET;             /* using IPv4      */
   servAddr.sin_port   = htons(SERVER_PORT);  /* on SERVER_PORT  */
+  LOG_INF("server settings");
 
 	if (inet_pton(AF_INET, SERVER_ADDR, &servAddr.sin_addr) != 1) {
 	  LOG_ERR("Invalid server address");
 	  ret = -1; 
 	}
 
+  /* Connect to the server */
+  LOG_INF("Connecting to the server...");
+  if ((ret = connect(sock, (struct sockaddr*) &servAddr, sizeof(servAddr)))
+       == -1) {
+      LOG_ERR("Failed to connect");
+      goto end;
+  }
 
   /*---------------------------------*/
   /* Start of wolfSSL initialization and configuration */
   /*---------------------------------*/
   /* Initialize wolfSSL */
+  LOG_INF("wolfssl init");
   if ((ret = wolfSSL_Init()) != WOLFSSL_SUCCESS) {
       fprintf(stderr, "ERROR: Failed to initialize the library\n");
       goto socket_cleanup;
   }
 
-	return ret;
+#ifdef DEBUG_WOLFSSL
+    wolfSSL_Debugging_ON();
+#endif
+
+  LOG_INF("wolfssl ctx");
+  /* Create and initialize WOLFSSL_CTX */
+#ifdef USE_TLSV13
+  LOG_INF("Using TLS v1.3");
+  ctx = wolfSSL_CTX_new_ex(wolfTLSv1_3_client_method_ex(HEAP_HINT), HEAP_HINT);
+#else
+  LOG_INF("Using TLS v1.2");
+  ctx = wolfSSL_CTX_new_ex(wolfTLSv1_2_client_method_ex(HEAP_HINT), HEAP_HINT);
+#endif
+  if (ctx == NULL) {
+    LOG_ERR("Failed to create WOLFSSL_CTX");
+    ret = -1;
+    goto socket_cleanup;
+  }
+
+  /* Load client certificate into WOLFSSL_CTX */
+  LOG_INF("Loading client certificate...");
+  if ((ret = wolfSSL_CTX_use_certificate_buffer(ctx, client_cert_der,
+               client_cert_der_len, WOLFSSL_FILETYPE_ASN1)) != WOLFSSL_SUCCESS) {
+    LOG_ERR("Failed to load client certificate.");
+    goto ctx_cleanup;
+  }
+
+  /* Load client key into WOLFSSL_CTX */
+  LOG_INF("Loading client key...");
+  if ((ret = wolfSSL_CTX_use_PrivateKey_buffer(ctx, client_key_der,
+               client_key_der_len, WOLFSSL_FILETYPE_ASN1)) != WOLFSSL_SUCCESS) {
+    LOG_ERR("Failed to load client key.");
+    goto ctx_cleanup;
+  }
+
+  /* Load CA certificate into WOLFSSL_CTX for validating peer */
+  LOG_INF("Loading CA certificate...");
+  if ((ret = wolfSSL_CTX_load_verify_buffer_ex(ctx, ca_cert_der,
+          ca_cert_der_len, WOLFSSL_FILETYPE_ASN1, 0,
+          /* DO NOT use this in production. You should
+           * implement a way to get the current date. */
+          WOLFSSL_LOAD_FLAG_DATE_ERR_OKAY)) !=
+          WOLFSSL_SUCCESS) {
+    LOG_ERR("Failed to load client key.");
+    goto ctx_cleanup;
+  }
+
+  /* validate peer certificate */
+  wolfSSL_CTX_set_verify(ctx,
+    WOLFSSL_VERIFY_PEER|WOLFSSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+    verifyIgnoreDateError);
+
+  /* Create a WOLFSSL object */
+  LOG_INF("Creating SSL object...");
+  if ((ssl = wolfSSL_new(ctx)) == NULL) {
+      LOG_ERR("Failed to create WOLFSSL object");
+      ret = -1;
+      goto ctx_cleanup;
+  }
+
+  /* Attach wolfSSL to the socket */
+  LOG_INF("Attaching SSL object...");
+  if ((ret = wolfSSL_set_fd(ssl, sock)) != WOLFSSL_SUCCESS) {
+      LOG_ERR("Failed to set the file descriptor");
+      goto cleanup;
+  }
+
+  /* Connect to wolfSSL on the server side */
+  LOG_INF("Connecting to server...");
+  if ((ret = wolfSSL_connect(ssl)) != WOLFSSL_SUCCESS) {
+      wolfSSL_ERR_error_string(wolfSSL_get_error(ssl, ret), wolfsslErrorStr);
+      LOG_ERR("Failed to connect to server: %s", wolfsslErrorStr);
+      goto cleanup;
+  }
+
+  cipher = wolfSSL_get_current_cipher(ssl);
+  LOG_INF("SSL cipher suite is %s", wolfSSL_CIPHER_get_name(cipher));
+
+  /* Construct a message for the server */
+  LOG_INF("Constructing message for server...");
+  memset(buff, 0, sizeof(buff));
+  memcpy(buff, msg, sizeof(msg));
+  len = strnlen(buff, sizeof(buff));
+
+  /* Send the message to the server */
+  LOG_INF("Sending message to server...");
+  if ((ret = wolfSSL_write(ssl, buff, len)) != len) {
+      LOG_ERR("Failed to write entire message");
+      LOG_ERR("%d bytes of %d bytes were sent", ret, (int) len);
+      goto cleanup;
+  }
+
+  /* Read the server data into our buff array */
+  LOG_INF("Reading message from server...");
+  memset(buff, 0, sizeof(buff));
+  if ((ret = wolfSSL_read(ssl, buff, sizeof(buff)-1)) == -1) {
+      LOG_ERR("Failed to read from server");
+      goto cleanup;
+  }
+
+  /* Print to stdout any data the server sends */
+  LOG_INF("Server: %s", buff);
+
+  /* Bidirectional shutdown */
+  LOG_INF("Starting SSL shutdown...");
+  while (wolfSSL_shutdown(ssl) == WOLFSSL_SHUTDOWN_NOT_DONE) {
+      LOG_INF("SSL shutdown not complete");
+  }
+
+  LOG_INF("SSL shutdown complete");
+
+  ret = 0;
 
   /* Cleanup and return */
-//cleanup:
-//  wolfSSL_free(ssl);      /* Free the wolfSSL object                  */
-//ctx_cleanup:
-//  wolfSSL_CTX_free(ctx);  /* Free the wolfSSL context object          */
-//  wolfSSL_Cleanup();      /* Cleanup the wolfSSL environment          */
+cleanup:
+  wolfSSL_free(ssl);      /* Free the wolfSSL object                  */
+ctx_cleanup:
+  wolfSSL_CTX_free(ctx);  /* Free the wolfSSL context object          */
+  wolfSSL_Cleanup();      /* Cleanup the wolfSSL environment          */
 socket_cleanup:
   close(sock)    ;          /* Close the connection to the server       */
 end:
+  LOG_INF("ret: %d", ret);
   return ret;               /* Return reporting a success               */
 }
 
