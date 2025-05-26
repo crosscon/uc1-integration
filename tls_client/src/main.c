@@ -13,7 +13,6 @@ LOG_MODULE_REGISTER(MAIN);
 
 #include <zephyr/kernel.h>
 #include <zephyr/linker/sections.h>
-// #include <errno.h>
 #include <stdio.h>
 
 #include <zephyr/net/net_context.h>
