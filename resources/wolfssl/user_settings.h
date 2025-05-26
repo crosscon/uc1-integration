@@ -55,38 +55,8 @@ extern "C" {
 //#define FREERTOS_TCP
 
 /* RTOS */
-/* Default is POSIX mutex and pthreads*/
-//#define SINGLE_THREADED
-//#define FREERTOS
 #define NO_FILESYSTEM
 #define NO_WRITEV
-
-/* ------------------------------------------------------------------------- */
-/* Hardware */
-/* ------------------------------------------------------------------------- */
-/* CryptoCell support */
-#if 0
-    //#define WOLFSSL_CRYPTOCELL
-    //#define WOLFSSL_CRYPTOCELL_AES
-#endif
-/* PSA support */
-#ifdef CONFIG_MBEDTLS_PSA_CRYPTO_C
-    #define WOLFSSL_HAVE_PSA
-    #ifndef SINGLE_THREADED
-        #define WOLFSSL_PSA_GLOBAL_LOCK
-    #endif
-    #define WC_NO_HASHDRBG /* use PSA RNG directly via wc_psa_get_random */
-#endif
-
-/* ------------------------------------------------------------------------- */
-/* FIPS */
-/* ------------------------------------------------------------------------- */
-#ifdef CONFIG_WOLFCRYPT_FIPS
-    /* FIPS Ready */
-    #define HAVE_FIPS_VERSION 5
-    #define HAVE_FIPS_VERSION_MINOR 3
-#endif
-
 
 /* ------------------------------------------------------------------------- */
 /* TLS */
@@ -97,8 +67,7 @@ extern "C" {
 #else
     #define WOLFSSL_NO_TLS12
 #endif
-//#define NO_WOLFSSL_SERVER /* Optionally disable TLS server code */
-//#define NO_WOLFSSL_CLIENT /* Optionally disable TLS client code */
+#define NO_WOLFSSL_SERVER /* Optionally disable TLS server code */
 
 /* TLS v1.3 */
 #if defined(CONFIG_WOLFSSL_TLS_VERSION_1_3) || defined(CONFIG_WOLFSSL_TLS13_ENABLED)
@@ -118,7 +87,7 @@ extern "C" {
 
 /* ASN */
 #define WOLFSSL_ASN_TEMPLATE /* use newer ASN template asn.c code (default) */
-#if 0 /* optional space reductions */
+#if 1 /* optional space reductions */
     #define WOLFSSL_NO_ASN_STRICT
     #define IGNORE_NAME_CONSTRAINTS
 #endif
@@ -160,13 +129,6 @@ extern "C" {
     #define WOLFSSL_SET_CIPHER_BYTES
 #endif
 
-/* wolfTPM Zephyr */
-#if defined(CONFIG_WOLFTPM)
-    #define WOLF_CRYPTO_CB
-    #define WOLFSSL_AES_CFB
-#endif
-
-/* ------------------------------------------------------------------------- */
 /* Algorithms */
 /* ------------------------------------------------------------------------- */
 /* RNG */
@@ -235,7 +197,7 @@ extern "C" {
 #endif
 
 /* ChaCha20 / Poly1305 */
-#if 1
+#if 0
     #define HAVE_CHACHA
     #define HAVE_POLY1305
 
@@ -277,7 +239,7 @@ extern "C" {
 #endif
 
 /* SHA-3 */
-#if 1
+#if 0
     #define WOLFSSL_SHA3
 #endif
 
