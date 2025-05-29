@@ -33,7 +33,8 @@ manifest:
         - hal
 
     - name: trusted-firmware-m
-      revision: 8134106ef9cb3df60e8bd22b172532558e936bd2
+      remote: 3mdeb
+      revision: ec9a0cce8db3594a7bdb59803de263cc8d1f052c
       path: modules/tee/tf-m/trusted-firmware-m
       groups:
         - tee
