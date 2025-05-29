@@ -87,12 +87,12 @@ static int test_socket_connection(void) {
 
   /* Initialize the server address struct with zeros */ 
 	memset(&servAddr, 0, sizeof(servAddr));
-  LOG_INF("memset");
+  LOG_DBG("memset");
 
   /* Fill in the server address */
   servAddr.sin_family = AF_INET;             /* using IPv4      */
   servAddr.sin_port   = htons(SERVER_PORT);  /* on SERVER_PORT  */
-  LOG_INF("server settings");
+  LOG_DBG("server settings");
 
 	if (inet_pton(AF_INET, SERVER_ADDR, &servAddr.sin_addr) != 1) {
 	  LOG_ERR("Invalid server address");
@@ -111,7 +111,7 @@ static int test_socket_connection(void) {
   /* Start of wolfSSL initialization and configuration */
   /*---------------------------------*/
   /* Initialize wolfSSL */
-  LOG_INF("wolfssl init");
+  LOG_DBG("wolfssl init");
   if ((ret = wolfSSL_Init()) != WOLFSSL_SUCCESS) {
       fprintf(stderr, "ERROR: Failed to initialize the library\n");
       goto socket_cleanup;
@@ -121,10 +121,10 @@ static int test_socket_connection(void) {
     wolfSSL_Debugging_ON();
 #endif
 
-  LOG_INF("wolfssl ctx");
+  LOG_DBG("wolfssl ctx");
   /* Create and initialize WOLFSSL_CTX */
 #ifdef USE_TLSV13
-  LOG_INF("Using TLS v1.3");
+  LOG_DBG("Using TLS v1.3");
   ctx = wolfSSL_CTX_new_ex(wolfTLSv1_3_client_method_ex(HEAP_HINT), HEAP_HINT);
 #else
   LOG_INF("Using TLS v1.2");
@@ -193,7 +193,7 @@ static int test_socket_connection(void) {
   }
 
   cipher = wolfSSL_get_current_cipher(ssl);
-  LOG_INF("SSL cipher suite is %s", wolfSSL_CIPHER_get_name(cipher));
+  LOG_INF("SSL cipher suite is: %s", wolfSSL_CIPHER_get_name(cipher));
 
   /* Construct a message for the server */
   LOG_INF("Constructing message for server...");
@@ -218,7 +218,7 @@ static int test_socket_connection(void) {
   }
 
   /* Print to stdout any data the server sends */
-  LOG_INF("Server: %s", buff);
+  LOG_INF("Received from server: %s", buff);
 
   /* Bidirectional shutdown */
   LOG_INF("Starting SSL shutdown...");
@@ -239,7 +239,7 @@ ctx_cleanup:
 socket_cleanup:
   close(sock)    ;          /* Close the connection to the server       */
 end:
-  LOG_INF("ret: %d", ret);
+  LOG_DBG("ret: %d", ret);
   return ret;               /* Return reporting a success               */
 }
 
