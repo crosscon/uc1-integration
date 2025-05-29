@@ -4,3 +4,9 @@
 [submodule "CROSSCON-Hypervisor"]
 	path = CROSSCON-Hypervisor
 	url = https://github.com/crosscon/CROSSCON-Hypervisor.git
+[submodule "puf_vm0"]
+	path = puf_vm0
+	url = https://github.com/crosscon/ZK-PUF-Zephyr-Demo.git
+[submodule "puf_vm1"]
+	path = puf_vm1
+	url = https://github.com/crosscon/ZK-PUF-Zephyr-Demo.git

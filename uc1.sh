@@ -72,24 +72,8 @@ build_zephyr() {
   export DOCKER_IMAGE="ghcr.io/zephyrproject-rtos/zephyr-build:v0.27.5"
   if pushd "${ZEPHYR_WORKSPACE}" &> /dev/null; then
     case "${ZEPHYR_APP}" in
-      "hello_world")
-        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/hello_world_vm0/ -p
-        ;;
-      "hello_at")
-        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/hello_at/ -p
-        ;;
-      "echo_bot")
-        docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/echo_bot/ -p
-        ;;
-      "timer_test")
-        docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/timer_test -p
-        ;;
-      "wifi_app")
-        docker_run west build -b "${ZEPHYR_TARGET}" --shield mikroe_wifi_bt_click_mikrobus ./uc1-integration/wifi_app/ -p
-        ;;
       *)
-        echo "Unsupported ZEPHYR_APP: \"${ZEPHYR_APP}\""
-        usage
+        docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/${ZEPHYR_APP} -p
         ;;
     esac
     cp "build/zephyr/zephyr.bin" "${OUT_DIR}/vm1.bin"
@@ -117,13 +101,29 @@ build_bm() {
 build_puf_vms() {
   export DOCKER_IMAGE="ghcr.io/zephyrproject-rtos/zephyr-build:v0.27.5"
   if pushd "${ZEPHYR_WORKSPACE}" &> /dev/null; then
-    docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/hello_world_vm0 -p
+    local _ipc_config=""
+
+    # Patch VM0:
+    # 1. Change the IPC address to the one we use in the config
+    # 2. Apply overlay, to use different partition and UART, while maintaining
+    # the same Zephyr repo revision
+    _ipc_config="./uc1-integration/puf_vm0/application/src/crosscon_hv/crosscon_hv_config.h"
+    sed -i -E 's|^#define[[:space:]]+VMS_IPC_BASE[[:space:]]+.*$|#define VMS_IPC_BASE        0x20027000UL|' "$_ipc_config"
+
+    cp ./uc1-integration/hello_world_vm0/app.overlay ./uc1-integration/puf_vm0/application/
+
+    docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/puf_vm0/application -p
     cp "build/zephyr/zephyr.bin" "${OUT_DIR}/vm0.bin"
     cp "build/zephyr/zephyr.elf" "${OUT_DIR}/vm0.elf"
     export VM0_START=$(printf "0x%08x\n" $((0x$(nm build/zephyr/zephyr.elf | awk '/__start/ {print $1}') - 1)))
     echo "VM0_START extracted from zephyr.elf: ${VM0_START}"
 
-    docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/hello_world_vm1 -p
+    # Patch VM1:
+    # 1. Change the IPC address to the one we use in the config
+    _ipc_config="./uc1-integration/puf_vm1/application/src/crosscon_hv/crosscon_hv_config.h"
+    sed -i -E 's|^#define[[:space:]]+VMS_IPC_BASE[[:space:]]+.*$|#define VMS_IPC_BASE        0x20027000UL|' "$_ipc_config"
+
+    docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/puf_vm1/application -p
     cp "build/zephyr/zephyr.bin" "${OUT_DIR}/vm1.bin"
     cp "build/zephyr/zephyr.elf" "${OUT_DIR}/vm1.elf"
     export VM1_START=$(printf "0x%08x\n" $((0x$(nm build/zephyr/zephyr.elf | awk '/__start/ {print $1}') - 1)))
