@@ -46,7 +46,7 @@ static struct net_dhcpv4_option_callback dhcp_cb;
 
 /*********** Socket start ***********/
 
-#define SERVER_ADDR  "192.168.66.173"
+#define SERVER_ADDR  "192.168.4.113"
 #define SERVER_PORT  11111
 
 /* DO NOT use this in production. You should implement a way
@@ -160,7 +160,7 @@ static int test_socket_connection(void) {
            * implement a way to get the current date. */
           WOLFSSL_LOAD_FLAG_DATE_ERR_OKAY)) !=
           WOLFSSL_SUCCESS) {
-    LOG_ERR("Failed to load client key.");
+    LOG_ERR("Failed to load CA certificate.");
     goto ctx_cleanup;
   }
 

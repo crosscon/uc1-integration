@@ -166,7 +166,7 @@ extern "C" {
 #define WOLFSSL_OLD_PRIME_CHECK /* Use faster DH prime checking */
 
 /* RSA */
-#if 1
+#if 0
     #undef NO_RSA
     #define WC_RSA_BLINDING
     //#define WC_RSA_NO_PADDING
