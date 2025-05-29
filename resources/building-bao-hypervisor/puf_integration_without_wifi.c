@@ -17,7 +17,7 @@ struct vm_config zephyr_vm0 = {
                 .size = 0x28000
             }
         },
-        .dev_num = 4,
+        .dev_num = 3,
         .devs =  (struct vm_dev_region[]) {
             {
                 /* Flexcomm Interface 3 (USART3) */
@@ -38,12 +38,6 @@ struct vm_config zephyr_vm0 = {
                 .pa = 0x40013000,
                 .va = 0x40013000,
                 .size = 0xE000,
-            },
-            {
-                /* RNG */
-                .pa = 0x4003a000,
-                .va = 0x4003a000,
-                .size = 0x1000,
             },
         },
         .ipc_num = 1,
@@ -99,10 +93,12 @@ struct vm_config zephyr_vm1 = {
                 .size = 0xE000,
             },
             {
-                /* RNG */
-                .pa = 0x4003a000,
-                .va = 0x4003a000,
-                .size = 0x1000,
+                .pa = 0x4003B000, /* PUF */
+                .id   = 0,
+                .va = 0x4003B000,
+                .size = 0x2000,
+                .interrupt_num = 1,
+                .interrupts    = (irqid_t[]){ 16 + 56 },
             },
         },
         .ipc_num = 1,
