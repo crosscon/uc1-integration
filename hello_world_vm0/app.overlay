@@ -1,0 +1,40 @@
+/ {
+	aliases{
+		usart-0 = &flexcomm3;
+	};
+
+	chosen {
+		zephyr,console = &flexcomm3;
+		zephyr,shell-uart = &flexcomm3;
+		zephyr,uart-mcumgr = &flexcomm3;
+	};
+
+	reserved-memory {
+    /delete-node/ partition@20030000;
+
+		non_secure_ram: partition@20010000 {
+			label = "non-secure-memory";
+			reg = <0x20010000 DT_SIZE_K(64)>;
+		};
+	};
+};
+
+&flash0 {
+
+	partitions {
+    /delete-node/ partition@48000;
+
+		slot0_ns_partition: partition@20000 {
+			label = "image-0-nonsecure";
+			reg = <0x00020000 DT_SIZE_K(160)>;
+		};
+	};
+};
+
+&flexcomm2 {
+	status = "disabled";
+};
+
+&flexcomm3 {
+	status = "okay";
+};
