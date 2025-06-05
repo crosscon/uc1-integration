@@ -77,7 +77,7 @@ At the moment, TLS client app needs a few extra steps:
 cp resources/wolfssl/user_settings.h ../modules/crypto/wolfssl
 ```
 
-* Increase flash partition size in `zephyr`:
+* Increase flash partition size in `../zephyr`:
 
 ```diff
 diff --git a/boards/nxp/lpcxpresso55s69/lpcxpresso55s69.dtsi b/boards/nxp/lpcxpresso55s69/lpcxpresso55s69.dtsi
@@ -111,6 +111,17 @@ export ZEPHYR_APP="tls_client"
 ## Configure the WiFi network
 
 Local changes to the WiFi Settings can be made via
-`wifi_app/src/wifi_config_local.h` in WiFi-enabled apps directories. These
-settings are covered in `.gitignore`, so there is no need to worry about
+`<app_directory>/src/wifi_config_local.h` in WiFi-enabled apps directories.
+These settings are covered in `.gitignore`, so there is no need to worry about
 leaking them to repo.
+
+WiFi-enabled apps are for instance:
+- `wifi_app`,
+- `tls_client`.
+
+This file should follow the following format:
+
+```
+#define WIFI_SSID      "SSID"
+#define WIFI_PASSWORD  "PASSWORD"
+```
