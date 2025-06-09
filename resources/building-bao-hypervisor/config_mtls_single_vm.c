@@ -2,7 +2,7 @@
 
 struct vm_config zephyr = {
     .image = VM_IMAGE_LOADED(0x00048000, 0x00048000, 0x40000),
-    .entry = @@ZEPHYR_VM1_ENTRY@@,
+    .entry = @@ZEPHYR_VM0_ENTRY@@,
     .platform = {
         .cpu_num = 1,
         .region_num = 2,
