@@ -244,6 +244,17 @@ case "$CMD" in
     build_puf_vms
     build_hv
     ;;
+
+  "build_mtls_puf")
+    export ZEPHYR_TARGET="lpcxpresso55s69/lpc55s69/cpu0/ns"
+    export HV_CONFIG="config_mtls_single_vm"
+    export ZEPHYR_APP="tls_client"
+    rm -rf "${OUT_DIR}"
+    mkdir -p "${OUT_DIR}"
+    build_zephyr
+    build_bm
+    build_hv
+    ;;
   "no_hv_zephyr")
     export ZEPHYR_TARGET="lpcxpresso55s69/lpc55s69/cpu0"
     rm -rf "${OUT_DIR}"
