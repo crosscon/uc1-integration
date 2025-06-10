@@ -253,7 +253,7 @@ case "$CMD" in
     export ZEPHYR_TARGET="lpcxpresso55s69/lpc55s69/cpu0/ns"
     rm -rf "${OUT_DIR}"
     mkdir -p "${OUT_DIR}"
-    export HV_CONFIG="config_mtls_single_vm"
+    export HV_CONFIG="config_mtls_puf_vms"
     export ZEPHYR_APP="tls_client"
     export VM_NO=0
     build_zephyr
