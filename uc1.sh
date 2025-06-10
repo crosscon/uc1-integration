@@ -68,6 +68,8 @@ docker_run() {
 }
 
 build_zephyr() {
+  local VM_NO="${VM_NO:-1}"
+  local start_varname="VM${VM_NO}_START"
   [ -z "${ZEPHYR_APP}" ] && usage
   export DOCKER_IMAGE="ghcr.io/zephyrproject-rtos/zephyr-build:v0.27.5"
   if pushd "${ZEPHYR_WORKSPACE}" &> /dev/null; then
@@ -76,11 +78,13 @@ build_zephyr() {
         docker_run west build -b "${ZEPHYR_TARGET}" ./uc1-integration/${ZEPHYR_APP} -p
         ;;
     esac
-    cp "build/zephyr/zephyr.bin" "${OUT_DIR}/vm1.bin"
-    cp "build/zephyr/zephyr.elf" "${OUT_DIR}/vm1.elf"
-    export VM1_START=$(printf "0x%08x\n" $((0x$(nm build/zephyr/zephyr.elf | awk '/__start/ {print $1}') - 1)))
-    export VM0_START=$(printf "0x%08x\n" $((0x$(nm build/zephyr/zephyr.elf | awk '/__start/ {print $1}') - 1)))
-    echo "VM1_START extracted from zephyr.elf: ${VM1_START}"
+    cp "build/zephyr/zephyr.bin" "${OUT_DIR}/vm$VM_NO.bin"
+    cp "build/zephyr/zephyr.elf" "${OUT_DIR}/vm$VM_NO.elf"
+    local start_address_hex=$(nm build/zephyr/zephyr.elf | awk '/__start/ {print $1}')
+    local start_address_dec=$((0x$start_address_hex - 1))
+    local formatted_start=$(printf '0x%08x\n' $start_address_dec)
+    export "$start_varname=$formatted_start"
+    echo "${start_varname} extracted from zephyr.elf: ${!start_varname}"
     popd &> /dev/null
   fi
   export -n DOCKER_IMAGE
@@ -242,6 +246,20 @@ case "$CMD" in
     rm -rf "${OUT_DIR}"
     mkdir -p "${OUT_DIR}"
     build_puf_vms
+    build_hv
+    ;;
+
+  "build_mtls_puf")
+    export ZEPHYR_TARGET="lpcxpresso55s69/lpc55s69/cpu0/ns"
+    rm -rf "${OUT_DIR}"
+    mkdir -p "${OUT_DIR}"
+    export HV_CONFIG="config_mtls_puf_vms"
+    export ZEPHYR_APP="tls_client"
+    export VM_NO=0
+    build_zephyr
+    export ZEPHYR_APP="puf_vm1/application"
+    export VM_NO=1
+    build_zephyr
     build_hv
     ;;
   "no_hv_zephyr")
