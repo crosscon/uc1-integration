@@ -9,8 +9,8 @@ struct vm_config zephyr_vm0 = {
         .region_num = 2,
         .regions =  (struct vm_mem_region[]) {
             {
-                .base = 0x20021000, /* These are virtual it seems */
-                .size = 0x1E000 /* 120 KB */
+                .base = 0x20030000, /* As in dtsi */
+                .size = 0x10000 /* 64 KB */
             },
             {
                 .base = 0x00048000,
@@ -68,7 +68,7 @@ struct vm_config zephyr_vm1 = {
         .region_num = 2,
         .regions =  (struct vm_mem_region[]) {
             {
-                .base = 0x20010000, /* These are virtual it seems */
+                .base = 0x20010000, /* As in overlay */
                 .size = 0x10000 /* 64 KB*/
             },
             {
