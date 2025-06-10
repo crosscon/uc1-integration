@@ -108,6 +108,24 @@ export ZEPHYR_APP="tls_client"
 ./uc1.sh no_hv_zephyr
 ```
 
+### Two VMs: mtls client and puf
+
+This section shows how to create a setup with mtls client and puf VMs.
+
+1. Set up wifi credentials in `tls_client/src/wifi_config_local.h`.
+
+1. Copy app overlay to puf_vm1.
+
+    ```bash
+    cp resources/overlays/mtls_puf_vm1.overlay puf_vm1/application/app.overlay
+    ```
+
+2. Run following command to build, flash and run the demo
+
+    ```bash
+    ./uc1.sh build_mtls_puf && ./uc1.sh flash && ./uc1.sh hv_start
+    ```
+
 ## Configure the WiFi network
 
 Local changes to the WiFi Settings can be made via
