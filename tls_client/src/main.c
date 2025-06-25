@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include "pufcaller/pufcaller.h"
 #include <string.h>
 #include <zephyr/logging/log.h>
 
@@ -26,6 +27,9 @@ LOG_MODULE_REGISTER(MAIN);
 /* socket */
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/socket.h>
+
+/* puffcaller */
+#include "pufcaller.h"
 
 /* SSL */
 #ifndef WOLFSSL_USER_SETTINGS
@@ -378,7 +382,7 @@ static void wait_for_dhcp(void) {
         LOG_INF("Address is assigned");
         break;
     }
-    LOG_ERR("Waiting for address to assigned");
+    LOG_INF("Waiting for address to be assigned...");
     sleep(1);
   } while (1);
 }
@@ -403,6 +407,13 @@ int main(void) {
   wait_for_dhcp();
 
   test_socket_connection();
+
+  for (int i = 3; i > 0; i-- ) {
+    LOG_INF("Calling puf vm in %d..", i);
+    k_sleep(K_MSEC(1000));
+  }
+
+  call_puf();
 
   return 0;
 }

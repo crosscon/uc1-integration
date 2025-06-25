@@ -49,11 +49,11 @@ struct vm_config zephyr_vm0 = {
         .ipc_num = 1,
         .ipcs = (struct ipc[]) {
             {
-                .base = 0x20027000,
+                .base = 0x20020000,
                 .size = 0x1000,
                 .shmem_id = 0,
                 .interrupt_num = 1,
-                .interrupts = (irqid_t[]) {79}
+                .interrupts = (irqid_t[]) {78}
             }
         },
     }
@@ -76,7 +76,7 @@ struct vm_config zephyr_vm1 = {
                 .size = 0x28000
             }
         },
-        .dev_num = 2,
+        .dev_num = 3,
         .devs =  (struct vm_dev_region[]) {
             {
                 /* SYSCON + IOCON + PINT + SPINT */
@@ -90,15 +90,23 @@ struct vm_config zephyr_vm1 = {
                 .va = 0x40013000,
                 .size = 0xE000,
             },
+            {
+                .pa = 0x4003B000, /* PUF */
+                .id   = 0,
+                .va = 0x4003B000,
+                .size = 0x2000,
+                .interrupt_num = 1,
+                .interrupts    = (irqid_t[]){ 16 + 56 },
+            },
         },
         .ipc_num = 1,
         .ipcs = (struct ipc[]) {
             {
-                .base = 0x20027000,
+                .base = 0x20020000,
                 .size = 0x1000,
                 .shmem_id = 0,
                 .interrupt_num = 1,
-                .interrupts = (irqid_t[]) {78}
+                .interrupts = (irqid_t[]) {79}
             }
         },
     }
@@ -109,7 +117,7 @@ struct config config = {
     CONFIG_HEADER
     .shmemlist_size = 1,
     .shmemlist = (struct shmem[]) {
-        [0] = {.base = 0x20027000, .size = 0x1000,},
+        [0] = {.base = 0x20020000, .size = 0x1000,},
     },
     .vmlist_size = 2,
     .vmlist = (struct vm_config*[]) {
