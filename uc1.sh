@@ -259,6 +259,7 @@ case "$CMD" in
     build_zephyr
     export ZEPHYR_APP="puf_vm1/application"
     export VM_NO=1
+    sed -i 's/^#define VMS_IPC_BASE.*/#define VMS_IPC_BASE        0x20020000UL/' ./puf_vm1/application/src/crosscon_hv/crosscon_hv_config.h
     build_zephyr
     build_hv
     ;;
