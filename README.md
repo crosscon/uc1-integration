@@ -120,7 +120,15 @@ This section shows how to create a setup with mtls client and puf VMs.
     cp resources/overlays/mtls_puf_vm1.overlay puf_vm1/application/app.overlay
     ```
 
-2. Run following command to build, flash and run the demo
+1. Decrease `time_slice` to 1ms in hypervisor source code.
+    ```bash
+    sed -i 's/^const unsigned long long time_slice.*/const unsigned long long time_slice = TIME_MS(1);/' ./CROSSCON-Hypervisor/src/core/sched.c
+    ```
+    Note: This is a workaround for UART overflow to fix issues with wifi
+    card. It gives more opportunities for Zephyr VM to copy UART data from UART
+    FIFO to buffer.
+
+1. Run following command to build, flash and run the demo
 
     ```bash
     ./uc1.sh build_mtls_puf && ./uc1.sh flash && ./uc1.sh hv_start
