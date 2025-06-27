@@ -108,6 +108,34 @@ export ZEPHYR_APP="tls_client"
 ./uc1.sh no_hv_zephyr
 ```
 
+### Two VMs: mtls client and puf
+
+This section shows how to create a setup with mtls client and puf VMs.
+
+1. Set up wifi credentials in `tls_client/src/wifi_config_local.h` and update
+   IP address of tls server app (`SERVER_ADDR`) in `tls_client/src/main.c `.
+
+1. Copy app overlay to puf_vm1.
+
+    ```bash
+    cp resources/overlays/mtls_puf_vm1.overlay puf_vm1/application/app.overlay
+    ```
+
+1. Decrease `time_slice` to 1ms in hypervisor source code.
+    ```bash
+    sed -i 's/^const unsigned long long time_slice.*/const unsigned long long time_slice = TIME_MS(1);/' ./CROSSCON-Hypervisor/src/core/sched.c
+    ```
+    Note: This is a workaround for UART overflow to fix issues with wifi
+    card. It gives more opportunities for Zephyr VM to copy UART data from UART
+    FIFO to buffer.
+    [[Source](https://github.com/crosscon/CROSSCON-Hypervisor-and-TEE-Isolation-Demos/issues/37)]
+
+1. Run following command to build, flash and run the demo
+
+    ```bash
+    ./uc1.sh build_mtls_puf && ./uc1.sh flash && ./uc1.sh hv_start
+    ```
+
 ## Configure the WiFi network
 
 Local changes to the WiFi Settings can be made via

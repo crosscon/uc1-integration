@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include "pufcaller/pufcaller.h"
 #include <string.h>
 #include <zephyr/logging/log.h>
 
@@ -27,6 +28,9 @@ LOG_MODULE_REGISTER(MAIN);
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/socket.h>
 
+/* puffcaller */
+#include "pufcaller.h"
+
 /* SSL */
 #ifndef WOLFSSL_USER_SETTINGS
     #include <wolfssl/options.h>
@@ -46,7 +50,7 @@ static struct net_dhcpv4_option_callback dhcp_cb;
 
 /*********** Socket start ***********/
 
-#define SERVER_ADDR  "192.168.4.113"
+#define SERVER_ADDR  "192.168.4.111"
 #define SERVER_PORT  11111
 
 /* DO NOT use this in production. You should implement a way
@@ -60,7 +64,7 @@ static int verifyIgnoreDateError(int preverify, WOLFSSL_X509_STORE_CTX* store)
 }
 
 static int test_socket_connection(void) {
-  struct sockaddr_in servAddr; 
+  struct sockaddr_in servAddr;
   int                ret;
   int                sock;
   char               buff[256];
@@ -85,7 +89,7 @@ static int test_socket_connection(void) {
 
   LOG_INF("Socket created successfuly");
 
-  /* Initialize the server address struct with zeros */ 
+  /* Initialize the server address struct with zeros */
 	memset(&servAddr, 0, sizeof(servAddr));
   LOG_DBG("memset");
 
@@ -96,7 +100,7 @@ static int test_socket_connection(void) {
 
 	if (inet_pton(AF_INET, SERVER_ADDR, &servAddr.sin_addr) != 1) {
 	  LOG_ERR("Invalid server address");
-	  ret = -1; 
+	  ret = -1;
 	}
 
   /* Connect to the server */
@@ -369,6 +373,21 @@ static int connect_to_wifi(void) {
   return 0;
 }
 
+static void wait_for_dhcp(void) {
+  struct in_addr *addr;
+
+  do {
+    addr = net_if_ipv4_get_global_addr(sta_iface, NET_ADDR_ANY_STATE);
+    if (addr) {
+        LOG_INF("Address is assigned");
+        break;
+    }
+    LOG_INF("Waiting for address to be assigned...");
+    sleep(1);
+  } while (1);
+}
+
+
 int main(void) {
   LOG_INF("Hello in WiFi App!");
   net_mgmt_init_event_callback(&cb, wifi_event_handler, NET_EVENT_WIFI_MASK);
@@ -385,10 +404,16 @@ int main(void) {
   LOG_INF("Run dhcpv4 client");
   net_if_foreach(start_dhcpv4_client, NULL);
 
-  /* Wait for network to settle */
-  /* TODO: find a better way of ensuring this */
-  sleep(5);
+  wait_for_dhcp();
+
   test_socket_connection();
+
+  for (int i = 3; i > 0; i-- ) {
+    LOG_INF("Calling puf vm in %d..", i);
+    k_sleep(K_MSEC(1000));
+  }
+
+  call_puf();
 
   return 0;
 }

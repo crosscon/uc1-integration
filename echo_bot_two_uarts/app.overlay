@@ -1,0 +1,16 @@
+/ {
+    aliases {
+        uart-0 = &flexcomm3;
+        uart-1 = &flexcomm2;
+    };
+};
+
+&flexcomm3 {
+    status = "okay";
+    current-speed = <115200>;
+};
+
+&flexcomm2 {
+    status = "okay";
+    current-speed = <115200>;
+};
