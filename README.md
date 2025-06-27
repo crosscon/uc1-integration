@@ -112,7 +112,8 @@ export ZEPHYR_APP="tls_client"
 
 This section shows how to create a setup with mtls client and puf VMs.
 
-1. Set up wifi credentials in `tls_client/src/wifi_config_local.h`.
+1. Set up wifi credentials in `tls_client/src/wifi_config_local.h` and update
+   IP address of tls server app (`SERVER_ADDR`) in `tls_client/src/main.c `.
 
 1. Copy app overlay to puf_vm1.
 
@@ -127,6 +128,7 @@ This section shows how to create a setup with mtls client and puf VMs.
     Note: This is a workaround for UART overflow to fix issues with wifi
     card. It gives more opportunities for Zephyr VM to copy UART data from UART
     FIFO to buffer.
+    [[Source](https://github.com/crosscon/CROSSCON-Hypervisor-and-TEE-Isolation-Demos/issues/37)]
 
 1. Run following command to build, flash and run the demo
 
