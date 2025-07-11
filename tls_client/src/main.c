@@ -50,8 +50,8 @@ static struct net_dhcpv4_option_callback dhcp_cb;
 
 /*********** Socket start ***********/
 
-#define SERVER_ADDR  "192.168.4.111"
-#define SERVER_PORT  11111
+#define SERVER_ADDR  "192.168.10.28"
+#define SERVER_PORT  12345
 
 /* DO NOT use this in production. You should implement a way
  * to get the current date. */
@@ -139,6 +139,13 @@ static int test_socket_connection(void) {
     ret = -1;
     goto socket_cleanup;
   }
+
+  LOG_INF("Setting up cipher list...");
+  if (wolfSSL_CTX_set_cipher_list(ctx, "ECDHE-ECDSA-AES256-GCM-SHA384") != WOLFSSL_SUCCESS) {
+        fprintf(stderr, "Failed to set cipher list\n");
+        ret = -1;
+        goto ctx_cleanup;
+    }
 
   /* Load client certificate into WOLFSSL_CTX */
   LOG_INF("Loading client certificate...");
