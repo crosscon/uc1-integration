@@ -30,12 +30,13 @@ Usage: ./$(basename ${0}) command [options]
 This is wrapper for building/flashing/running UC1 stages
 
   Commands:
-    build         build HV and VMs: VM0 (bare-metal), VM1 (ZEPHYR_APP) - target more useful for testing
-    build_puf     build HV and VMs: VM0 (Zephyr VM0), VM1 (Zephyr VM1) - default target for UC1.1 integration
-    flash         flash HV and VMs
-    hv_start      start HV via GDB (HV still cannot boot by itself?) 
-    gdb_start     start GDB session with no extra commands
-    no_hv_zephyr  build and flash ZEPHYR_APP as bare-metal (no hypervisor) - useful for debugging and comparing
+    build           build HV and VMs: VM0 (bare-metal), VM1 (ZEPHYR_APP) - target more useful for testing
+    build_puf       build HV and VMs: VM0 (Zephyr VM0), VM1 (Zephyr VM1) - default target for UC1.1 integration
+    flash           flash HV and VMs
+    hv_start        start HV via GDB (HV still cannot boot by itself?) 
+    gdb_start       start GDB session with no extra commands
+    no_hv_zephyr    build and flash ZEPHYR_APP as bare-metal (no hypervisor) - useful for debugging and comparing
+    build_mtls_puf  build demo with tls and PUF VMs. The tls VM attempts calling PUF VM functions.
 
   Environment variables:
     ZEPHYR_APP    name of the Zephyr app to be included in Zephyr VM:
@@ -48,6 +49,7 @@ This is wrapper for building/flashing/running UC1 stages
                    - single_bm - single VM running default bare-metal app
                    - single_zephyr - single VM running zephyr app selected by ZEPHYR_APP
                    - two_bm_zephyr - two VMs (VM0 - bare-metal, VM1 - Zephyr)
+    TARGET       target platform number. Each platform has assigned asset tag. Follow the sticker.
 
 EOF
   exit 0
@@ -220,6 +222,50 @@ no_hv_flash() {
   echo "Press RESET button to start the firmware"
 }
 
+# This function copies binary cryptographic data (key and activation code) into
+# built binary (zephyr)
+insert_crypt() {
+  export DOCKER_IMAGE="bao-hypervisor-image"
+
+  # Check required environment variables
+  if [[ -z "$VM_NO" || -z "$TARGET" ]]; then
+    errorExit "VM_NO and TARGET must be exported."
+  fi
+
+  # Define local variable
+  local CRYPT_BINARIES_PATH="$ROOT_DIR/resources/enrollment_bin"
+
+  # Define file paths
+  local KEY_FILE="$CRYPT_BINARIES_PATH/k_${TARGET}.bin"
+  local AC_FILE="$CRYPT_BINARIES_PATH/ac_${TARGET}.bin"
+  local VM_BIN="$OUT_DIR/vm${VM_NO}.elf"
+
+  # Check if the required files exist
+  if [[ ! -f "$KEY_FILE" || ! -f "$AC_FILE" ]]; then
+    errorExit "Error: Required binary files not found."
+  fi
+
+  # Perform the update operations
+  echo "Check placeholder!"
+  echo "*---- ACTIVATION CODE ----*"
+  docker_run arm-none-eabi-objdump -s -j .activation_code "$VM_BIN"
+  echo "*---- KEY ----*"
+  docker_run arm-none-eabi-objdump -s -j .key_code "$VM_BIN"
+
+
+  echo "Copying crypt binaries!"
+  docker_run arm-none-eabi-objcopy -v --update-section .key_code="$KEY_FILE" "$VM_BIN"
+  docker_run arm-none-eabi-objcopy -v --update-section .activation_code="$AC_FILE" "$VM_BIN"
+
+  echo "Check if copying succeeded!"
+  echo "*---- ACTIVATION CODE ----*"
+  docker_run arm-none-eabi-objdump -s -j .activation_code "$VM_BIN"
+  echo "*---- KEY ----*"
+  docker_run arm-none-eabi-objdump -s -j .key_code "$VM_BIN"
+
+  export -n DOCKER_IMAGE
+}
+
 CMD="$1"
 
 case "$CMD" in
@@ -246,6 +292,8 @@ case "$CMD" in
     rm -rf "${OUT_DIR}"
     mkdir -p "${OUT_DIR}"
     build_puf_vms
+    export VM_NO=1
+    insert_crypt
     build_hv
     ;;
 
