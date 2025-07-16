@@ -67,7 +67,9 @@ struct vm_config zephyr_vm1 = {
             },
             {
                 .base = 0x00048000,
-                .size = 0x28000
+                /* Note: The PUF_VM hardcodes crypto binaries address starting
+                at 0x00070000, refer to: linker_puf_sections.ld */
+                .size = 0x29000
             }
         },
         .dev_num = 4,
