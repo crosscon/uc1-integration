@@ -1,7 +1,7 @@
 # Context-Based Authentication
 
 This readme provides steps to reproduce the CBA demo that should be used during
-development of UC1.2.
+the development of UC1.2.
 
 ## Building remote server
 
@@ -61,10 +61,10 @@ checkout the needed commit:
 
 2. [Build and
 enter](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b029f57422d00420e64369f199981d7e75/env#build--run-the-container)
-  and enter the container.
+  the container.
 3. Copy [devicetree
   `rpi4-ws/nexmon.dts`](https://github.com/crosscon/context-based-auth-nexmon-vm/blob/9ad70a6ef05947c99b8dcfb205d7bca6f7813eb0/rpi4-ws/nexmon.dts) to the `rpi4-ws` directory and prepare
-  Nexmon VM image (execute these command inside the container):
+  Nexmon VM image (execute these commands inside the container):
 
     ```bash
     dtc -I dts -O dtb -o rpi4-ws/nexmon.dts rpi4-ws/nexmon.dtb
@@ -83,7 +83,7 @@ enter](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b
     ```
 
 4. [Configure](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b029f57422d00420e64369f199981d7e75?tab=readme-ov-file#configuration)
-  the CBA TA, CBA Pseaudo TA and CBA Host Application. The following changes
+  the CBA TA, CBA Pseudo TA and CBA Host Application. The following changes
   worked when writing this readme:
 
     ```diff
@@ -131,7 +131,7 @@ enter](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b
 
     ```
 
-    There was no need to configure the CBA Pseudo TA, that is located under
+    There was no need to configure the CBA Pseudo TA, which is located under
     `optee_os/core/pta/`.
 
     > Note: use the IP and `signature_buffer` from [the previous
@@ -147,7 +147,7 @@ enter](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b
 
 ## Verifying the demo
 
-Follow the steps below to verify the the demo works correcly:
+Follow the steps below to verify the demo works correctly:
 
 1. Launch hypervisor on RPi:
 
@@ -155,13 +155,13 @@ Follow the steps below to verify the the demo works correcly:
     fatload mmc 0 0x200000 crossconhyp.bin; go 0x200000
     ```
 
-2. During booting of the Linux image the ACT LED (the green LED near the red PWR
+2. During booting of the Linux image the, ACT LED (the green LED near the red PWR
   LED) should flick in two different ways. Firstly, it will flick "quick ON...
   quick OFF...quick ON...long OFF" several times. Then, it should turn on and
-  off several times with 1 second intervals and power off. If both flicks
-  sequences finish - it means, that the Nexmon VM is UP and running. **Do not
-  proceed with steps untill you are sure it is up and running!**
-3. Log in into the Linux by typing `root`, connect the RJ45 to the RPi and
+  off several times with 1-second intervals and power off. If both flick
+  sequence finishes, it means that the Nexmon VM is UP and running. **Do not
+  proceed with steps until you are sure it is up and running!**
+3. Log into the Linux by typing `root`, connect the RJ45 to the RPi, and
   launch DHCP client:
 
     ```bash
@@ -293,9 +293,9 @@ Are expected.
 
 The Nexmon VM could be compiled by following [the
 README](https://github.com/crosscon/context-based-auth-nexmon-vm/blob/kernel_5.10.92-v8%2B_nexmon_automated/README.md)
-from the commit `9ad70a6ef05947c99b8dcfb205d7bca6f7813eb0`. Unfirtunately, due
-to some unknown issues it was deccided to use pre-compiled Nexmon VM. The binary
-is being prepared in the step 3 in the [Building RPi
+from the commit `9ad70a6ef05947c99b8dcfb205d7bca6f7813eb0`. Unfortunately, due
+to some unknown issues, it was decided to use a pre-compiled Nexmon VM. The
+binary is being prepared in step 3 in the [Building RPi
 image](#building-rpi-image) chapter.
 
 ### Remote server
