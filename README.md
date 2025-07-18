@@ -123,7 +123,7 @@ This section shows how to create a setup with mtls client and puf VMs.
 
 1. Decrease `time_slice` to 1ms in hypervisor source code.
     ```bash
-    sed -i 's/^const unsigned long long time_slice.*/const unsigned long long time_slice = TIME_MS(1);/' ./CROSSCON-Hypervisor/src/core/sched.c
+    sed -i 's/TIME_MS(10))/TIME_MS(1))/' CROSSCON-Hypervisor/src/core/sched.c
     ```
     Note: This is a workaround for UART overflow to fix issues with wifi
     card. It gives more opportunities for Zephyr VM to copy UART data from UART
