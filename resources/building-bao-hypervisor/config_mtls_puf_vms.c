@@ -1,8 +1,6 @@
 #include <config.h>
 
 struct vm_config zephyr_vm0 = {
-    // FIX ME
-    // .image= was removed, it's redundant at the moment.
     .entry = @@ZEPHYR_VM0_ENTRY@@,
     .platform = {
         .cpu_num = 1,
@@ -60,8 +58,6 @@ struct vm_config zephyr_vm0 = {
 };
 
 struct vm_config zephyr_vm1 = {
-    // FIX ME
-    // .image= was removed, it's redundant at the moment.
     .entry = @@ZEPHYR_VM1_ENTRY@@,
     .platform = {
         .cpu_num = 1,
@@ -91,10 +87,10 @@ struct vm_config zephyr_vm1 = {
                 .size = 0xE000,
             },
             {
-                .pa = 0x4003B000, /* PUF */
+                .pa = 0x40034000, /* PUF + FLASH-CONTROLLER */
                 .id   = 0,
-                .va = 0x4003B000,
-                .size = 0x2000,
+                .va = 0x40034000,
+                .size = 0x8000,
                 .interrupt_num = 1,
                 .interrupts    = (irqid_t[]){ 16 + 56 },
             },
