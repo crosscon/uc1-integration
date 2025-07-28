@@ -266,6 +266,56 @@ insert_crypt() {
   export -n DOCKER_IMAGE
 }
 
+# Update target address for crypto binaries
+update_crypt_addr() {
+  local LINKER_SCRIPT_PATH="$ROOT_DIR/puf_vm1/application/src/puf/lpc55s69/linker_puf_sections.ld"
+
+  [ -z "${HV_CONFIG}" ] && usage
+
+  case "${HV_CONFIG}" in
+    "config_mtls_puf_vms")
+      ac_addr=0x00047AEC # HARDCODED VALUES!
+      k_addr=0x00047F9C # HARDCODED VALUES!
+      ;;
+    "puf_integration_without_wifi")
+      ac_addr=0x00070000 # HARDCODED VALUES!
+      k_addr=0x00070500 # HARDCODED VALUES!
+      ;;
+    *)
+      echo "Unknown HV_CONFIG: $HV_CONFIG"
+      exit 1
+      ;;
+  esac
+
+  # Replace the whole line for .activation_code and .key_code
+  sed -i "s|^\.activation_code .*|.activation_code ${ac_addr} : ALIGN(4)|" "$LINKER_SCRIPT_PATH"
+  sed -i "s|^\.key_code .*|.key_code ${k_addr} : ALIGN(4)|" "$LINKER_SCRIPT_PATH"
+}
+
+update_ipc_addr() {
+  local puf_vm1_config_path="$ROOT_DIR/puf_vm1/application/src/crosscon_hv/crosscon_hv_config.h"
+
+  [ -z "${HV_CONFIG}" ] && usage
+
+  case "${HV_CONFIG}" in
+    "config_mtls_puf_vms")
+      ipc_addr=0x20020000UL
+      ;;
+    "puf_integration_without_wifi")
+      ipc_addr=0x20027000UL
+      ;;
+    *)
+      echo "Unknown HV_CONFIG: $HV_CONFIG"
+      exit 1
+      ;;
+  esac
+
+  # Update the VMS_IPC_BASE define line
+  sed -i "s|^#define VMS_IPC_BASE.*|#define VMS_IPC_BASE                    ${ipc_addr}|" "$puf_vm1_config_path"
+}
+
+
+
 CMD="$1"
 
 case "$CMD" in
@@ -294,6 +344,8 @@ case "$CMD" in
     build_puf_vms
     export VM_NO=1
     insert_crypt
+    update_crypt_addr
+    update_ipc_addr
     build_hv
     ;;
 
@@ -308,6 +360,8 @@ case "$CMD" in
     export ZEPHYR_APP="puf_vm1/application"
     export VM_NO=1
     sed -i 's/^#define VMS_IPC_BASE.*/#define VMS_IPC_BASE        0x20020000UL/' ./puf_vm1/application/src/crosscon_hv/crosscon_hv_config.h
+    update_crypt_addr
+    update_ipc_addr
     build_zephyr
     build_hv
     ;;
