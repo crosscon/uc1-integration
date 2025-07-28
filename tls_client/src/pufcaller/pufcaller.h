@@ -1,6 +1,7 @@
 #ifndef PUFCALLER_H
 #define PUFCALLER_H
+#include "../common/challenge.h"
 
-int call_puf(void);
+int challenge_puf(func_call_t * commitment, func_call_t * proofs);
 
 #endif

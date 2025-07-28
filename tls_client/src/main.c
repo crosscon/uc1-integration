@@ -7,6 +7,7 @@
  */
 
 #include "pufcaller/pufcaller.h"
+#include <stdint.h>
 #include <string.h>
 #include <zephyr/logging/log.h>
 
@@ -28,8 +29,9 @@ LOG_MODULE_REGISTER(MAIN);
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/socket.h>
 
-/* puffcaller */
-#include "pufcaller.h"
+/* pufcaller */
+#include "pufcaller/pufcaller.h"
+#include "common/challenge.h"
 
 /* SSL */
 #ifndef WOLFSSL_USER_SETTINGS
@@ -48,9 +50,12 @@ static struct net_mgmt_event_callback mgmt_cb;
 
 static struct net_dhcpv4_option_callback dhcp_cb;
 
+func_call_t        commCh;
+func_call_t        proofsCh;
+
 /*********** Socket start ***********/
 
-#define SERVER_ADDR  "192.168.10.28"
+#define SERVER_ADDR  "192.168.10.38"
 #define SERVER_PORT  12345
 
 /* DO NOT use this in production. You should implement a way
@@ -205,6 +210,30 @@ static int test_socket_connection(void) {
 
   cipher = wolfSSL_get_current_cipher(ssl);
   LOG_INF("SSL cipher suite is: %s", wolfSSL_CIPHER_get_name(cipher));
+
+  if (initFunc(&commCh, GET_COMMITMENT)) {
+    LOG_ERR("Failed to allocate memory for the challenge...");
+  }
+  LOG_DBG("Receiving challenge (commitment)");
+  if (recChallenge(ssl, &commCh)) {
+    LOG_ERR("Failed to receive commitment!");
+  } else {
+    LOG_HEXDUMP_INF(commCh.data_p1, CHALLENGE_LEN, "Challange 1 d1:");
+    LOG_HEXDUMP_INF(commCh.data_p2, CHALLENGE_LEN, "Challange 1 d2:");
+  }
+
+  if (initFunc(&proofsCh, GET_ZK_PROOFS)) {
+    LOG_ERR("Failed to allocate memory for the second challenge...");
+  }
+  LOG_DBG("Receiving challenge (proofs)");
+  if (recChallenge(ssl, &proofsCh)) {
+    LOG_ERR("Failed to receive proofs!");
+  } else {
+    LOG_HEXDUMP_INF(proofsCh.data_p1, CHALLENGE_LEN, "Challange 1 d1:");
+    LOG_HEXDUMP_INF(proofsCh.data_p2, CHALLENGE_LEN, "Challange 1 d2:");
+    LOG_HEXDUMP_INF(proofsCh.nonce, NONCE_LEN, "Nonce: ");
+  }
+
 
   /* Construct a message for the server */
   LOG_INF("Constructing message for server...");
@@ -396,6 +425,9 @@ static void wait_for_dhcp(void) {
 
 
 int main(void) {
+#ifdef IS_ZEPHYR
+  LOG_INF("IS_ZEPHYR defined");
+#endif
   LOG_INF("Hello in WiFi App!");
   net_mgmt_init_event_callback(&cb, wifi_event_handler, NET_EVENT_WIFI_MASK);
   net_mgmt_add_event_callback(&cb);
@@ -420,7 +452,10 @@ int main(void) {
     k_sleep(K_MSEC(1000));
   }
 
-  call_puf();
+  challenge_puf(&commCh, &proofsCh);
+
+  freeFunc(&commCh);
+  freeFunc(&proofsCh);
 
   return 0;
 }

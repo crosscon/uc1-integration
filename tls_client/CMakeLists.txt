@@ -15,6 +15,7 @@ target_include_directories(app PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/common
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pufcaller
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pufcaller/crosscon_hv
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/pufcaller/crosscon_hv/crosscon_hv_tee
 )
 
 # Optional: define HAS_LOCAL_WIFI_CONFIG if wifi_config_local.h exists
