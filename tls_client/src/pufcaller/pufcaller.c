@@ -29,7 +29,7 @@ static const uint8_t PUF_TA_UUID[TEE_UUID_LEN] = PUF_TA_UUID_BYTES;
 static const uint8_t CLIENT_UUID[TEE_UUID_LEN] = CLIENT_UUID_BYTES;
 
 // Helper functions to make the calling function logic easier to read
-int call_puf_ta_init(const struct device *tee_dev, int session_id)
+int call_puf_ta_init(const struct device *tee_dev, int session_id, func_call_t * call)
 {
     param[0].attr = TEE_PARAM_ATTR_TYPE_MEMREF_OUTPUT;
     param[0].a    = (uint64_t)(VMS_MEMREF0_OFFSET); // offsets
@@ -51,7 +51,7 @@ int call_puf_ta_init(const struct device *tee_dev, int session_id)
     param[3].b    = (uint64_t)32;                   // length: 32 bytes
     param[3].c    = (uint64_t)(uintptr_t)&ipc_shm;  // shared-memory ID (handle)
 
-    invoke_func_arg.func      = PUF_TA_INIT_FUNC_ID;
+    invoke_func_arg.func      = call->func;
     invoke_func_arg.session   = session_id;
     invoke_func_arg.cancel_id = 0;
     invoke_func_arg.ret       = 0;
@@ -82,15 +82,15 @@ int call_puf_ta_get_commitment(const struct device *tee_dev, int session_id, uin
     param[3].b    = (uint64_t)32;                   // length: 32 bytes
     param[3].c    = (uint64_t)(uintptr_t)&ipc_shm;  // shared-memory ID (handle)
 
-    invoke_func_arg.func      = PUF_TA_GET_COMMITMENT_FUNC_ID;
+    invoke_func_arg.func      = call->func;
     invoke_func_arg.session   = session_id;
     invoke_func_arg.cancel_id = 0;
     invoke_func_arg.ret       = 0;
     invoke_func_arg.ret_origin= 0;
 
     memset(shm_ptr, 0, 1024);
-    memcpy((void *)(shm_ptr + param[0].a), call->data_p1, param[0].b);
-    memcpy((void *)(shm_ptr + param[1].a), call->data_p2, param[1].b);
+    memcpy((void *)(shm_ptr + param[0].a), call->data_p[0].data, param[0].b);
+    memcpy((void *)(shm_ptr + param[1].a), call->data_p[0].data, param[1].b);
 
     return tee_invoke_func(tee_dev, &invoke_func_arg, 4, &param);
 }
@@ -118,16 +118,16 @@ int call_puf_ta_get_zk_proofs(const struct device *tee_dev, int session_id, uint
     param[3].b    = (uint64_t)64;
     param[3].c    = (uint64_t)(uintptr_t)&ipc_shm;
 
-    invoke_func_arg.func      = PUF_TA_GET_ZK_PROOFS_FUNC_ID;
+    invoke_func_arg.func      = call->func;
     invoke_func_arg.session   = session_id;
     invoke_func_arg.cancel_id = 0;
     invoke_func_arg.ret       = 0;
     invoke_func_arg.ret_origin= 0;
 
     memset(shm_ptr, 0, 1024);
-    memcpy((void *)(shm_ptr + param[0].a), call->data_p1, param[0].b);
-    memcpy((void *)(shm_ptr + param[1].a), call->data_p2, param[1].b);
-    memcpy((void *)(shm_ptr + param[2].a), call->nonce, param[2].b);
+    memcpy((void *)(shm_ptr + param[0].a), call->data_p[0].data, param[0].b);
+    memcpy((void *)(shm_ptr + param[1].a), call->data_p[1].data, param[1].b);
+    memcpy((void *)(shm_ptr + param[2].a), call->data_p[2].data, param[2].b);
 
     return tee_invoke_func(tee_dev, &invoke_func_arg, 4, &param);
 }
@@ -138,7 +138,16 @@ void vm_init() {
     LOG_INF("VM Initialized");
 }
 
-int challenge_puf(func_call_t * commitment, func_call_t * proofs)
+void cpy_last_result(func_call_t * call)
+{
+    for (uint8_t i=0; i < DATA_PORTIONS; i++) {
+        const volatile uint8_t *data = &msg->payload[param[i].a];
+
+        memcpy(call->data_p[i].data, data, call->data_p[i].len);
+    }
+}
+
+int challenge_puf(func_call_t * init, func_call_t * commitment, func_call_t * proofs)
 {
     vm_init();
 
@@ -195,12 +204,15 @@ int challenge_puf(func_call_t * commitment, func_call_t * proofs)
 
     LOG_INF("Calling PUF_TA_init");
 
-    res = call_puf_ta_init(tee_dev, session_id);
+    res = call_puf_ta_init(tee_dev, session_id, init);
     k_msleep(1000); // Give time to process, wait for interrupt
     if (res != 0) {
         LOG_ERR("calling PUF_TA_init failed: res=%d, TEE_ret=0x%08x", res, session_arg.ret);
         return -1;
     }
+
+    LOG_DBG("Copying result of init");
+    cpy_last_result(init);
 
     LOG_INF("Calling PUF_TA_get_commitment");
 
@@ -211,14 +223,20 @@ int challenge_puf(func_call_t * commitment, func_call_t * proofs)
         return -1;
     }
 
+    LOG_DBG("Copying result of commitment");
+    cpy_last_result(init);
+
     LOG_INF("Calling PUF_TA_get_ZK_proofs");
 
     res = call_puf_ta_get_zk_proofs(tee_dev, session_id, shm_ptr, proofs);
-    k_msleep(400); // Give time to process, wait for interrupt
+    k_msleep(1000); // Give time to process, wait for interrupt
     if (res != 0) {
         LOG_ERR("calling PUF_TA_get_ZK_proofs failed: res=%d, TEE_ret=0x%08x", res, session_arg.ret);
         return -1;
     }
+
+    LOG_DBG("Copying result of proofs");
+    cpy_last_result(init);
 
     res = tee_close_session(tee_dev, session_id);
     if (res != 0) {

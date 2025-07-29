@@ -50,6 +50,7 @@ static struct net_mgmt_event_callback mgmt_cb;
 
 static struct net_dhcpv4_option_callback dhcp_cb;
 
+func_call_t        initCh;
 func_call_t        commCh;
 func_call_t        proofsCh;
 
@@ -211,29 +212,44 @@ static int test_socket_connection(void) {
   cipher = wolfSSL_get_current_cipher(ssl);
   LOG_INF("SSL cipher suite is: %s", wolfSSL_CIPHER_get_name(cipher));
 
-  if (initFunc(&commCh, GET_COMMITMENT)) {
-    LOG_ERR("Failed to allocate memory for the challenge...");
-  }
-  LOG_DBG("Receiving challenge (commitment)");
-  if (recChallenge(ssl, &commCh)) {
+  if (initFunc(&initCh, PUF_TA_INIT_FUNC_ID, pattern_init_commit))
+    LOG_ERR("Failed to allocate memory for the init...");
+  LOG_DBG("Receiving init");
+  if (recChallenge(ssl, &initCh))
+    LOG_ERR("Failed to receive init!");
+
+  if (initFunc(&commCh, PUF_TA_GET_COMMITMENT_FUNC_ID, pattern_init_commit))
+    LOG_ERR("Failed to allocate memory for the commitment...");
+  LOG_DBG("Receiving commitment");
+  if (recChallenge(ssl, &commCh))
     LOG_ERR("Failed to receive commitment!");
-  } else {
-    LOG_HEXDUMP_INF(commCh.data_p1, CHALLENGE_LEN, "Challange 1 d1:");
-    LOG_HEXDUMP_INF(commCh.data_p2, CHALLENGE_LEN, "Challange 1 d2:");
-  }
 
-  if (initFunc(&proofsCh, GET_ZK_PROOFS)) {
-    LOG_ERR("Failed to allocate memory for the second challenge...");
-  }
-  LOG_DBG("Receiving challenge (proofs)");
-  if (recChallenge(ssl, &proofsCh)) {
+  if (initFunc(&proofsCh, PUF_TA_GET_ZK_PROOFS_FUNC_ID, pattern_proofs))
+    LOG_ERR("Failed to allocate memory for the proofs...");
+  LOG_DBG("Receiving proofs");
+  if (recChallenge(ssl, &proofsCh))
     LOG_ERR("Failed to receive proofs!");
-  } else {
-    LOG_HEXDUMP_INF(proofsCh.data_p1, CHALLENGE_LEN, "Challange 1 d1:");
-    LOG_HEXDUMP_INF(proofsCh.data_p2, CHALLENGE_LEN, "Challange 1 d2:");
-    LOG_HEXDUMP_INF(proofsCh.nonce, NONCE_LEN, "Nonce: ");
+
+  LOG_INF("Challenging the PUF");
+  challenge_puf(&initCh, &commCh, &proofsCh);
+
+  LOG_INF("Sending init response");
+  if (sendResponse(ssl, &initCh)) {
+    LOG_INF("Sending init response failed");
+    goto cleanup;
   }
 
+  LOG_INF("Sending commitment response");
+  if (sendResponse(ssl, &commCh)) {
+    LOG_INF("Sending commitment response failed");
+    goto cleanup;
+  }
+
+  LOG_INF("Sending proofs response");
+  if (sendResponse(ssl, &proofsCh)) {
+    LOG_INF("Sending proofs response failed");
+    goto cleanup;
+  }
 
   /* Construct a message for the server */
   LOG_INF("Constructing message for server...");
@@ -273,6 +289,9 @@ static int test_socket_connection(void) {
   /* Cleanup and return */
 cleanup:
   wolfSSL_free(ssl);      /* Free the wolfSSL object                  */
+  freeFunc(&initCh);
+  freeFunc(&commCh);
+  freeFunc(&proofsCh);
 ctx_cleanup:
   wolfSSL_CTX_free(ctx);  /* Free the wolfSSL context object          */
   wolfSSL_Cleanup();      /* Cleanup the wolfSSL environment          */
@@ -446,16 +465,6 @@ int main(void) {
   wait_for_dhcp();
 
   test_socket_connection();
-
-  for (int i = 3; i > 0; i-- ) {
-    LOG_INF("Calling puf vm in %d..", i);
-    k_sleep(K_MSEC(1000));
-  }
-
-  challenge_puf(&commCh, &proofsCh);
-
-  freeFunc(&commCh);
-  freeFunc(&proofsCh);
 
   return 0;
 }
