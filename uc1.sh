@@ -363,6 +363,7 @@ case "$CMD" in
     update_crypt_addr
     update_ipc_addr
     build_zephyr
+    insert_crypt
     build_hv
     ;;
   "no_hv_zephyr")

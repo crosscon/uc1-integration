@@ -90,7 +90,7 @@ int call_puf_ta_get_commitment(const struct device *tee_dev, int session_id, uin
 
     memset(shm_ptr, 0, 1024);
     memcpy((void *)(shm_ptr + param[0].a), call->data_p[0].data, param[0].b);
-    memcpy((void *)(shm_ptr + param[1].a), call->data_p[0].data, param[1].b);
+    memcpy((void *)(shm_ptr + param[1].a), call->data_p[1].data, param[1].b);
 
     return tee_invoke_func(tee_dev, &invoke_func_arg, 4, &param);
 }
@@ -224,7 +224,7 @@ int challenge_puf(func_call_t * init, func_call_t * commitment, func_call_t * pr
     }
 
     LOG_DBG("Copying result of commitment");
-    cpy_last_result(init);
+    cpy_last_result(commitment);
 
     LOG_INF("Calling PUF_TA_get_ZK_proofs");
 
@@ -236,7 +236,7 @@ int challenge_puf(func_call_t * init, func_call_t * commitment, func_call_t * pr
     }
 
     LOG_DBG("Copying result of proofs");
-    cpy_last_result(init);
+    cpy_last_result(proofs);
 
     res = tee_close_session(tee_dev, session_id);
     if (res != 0) {
