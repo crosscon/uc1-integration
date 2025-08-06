@@ -153,3 +153,39 @@ This file should follow the following format:
 #define WIFI_SSID      "SSID"
 #define WIFI_PASSWORD  "PASSWORD"
 ```
+
+## Running sagemath scripts
+
+There is no `sagemath` for Fedora, but there is public container image. Once the
+image is fetched, one can run the following command to run sagemath scripts to
+validate PUF authenticity.
+
+```bash
+docker run -it -v $(pwd)/puf_vm1/scripts/proofs/:/mnt sagemath/sagemath sage /mnt/proof_verifier_calc.sage -i
+```
+
+The above command will run the script in interactive mode.
+Below is command example of non-interactive mode
+
+```bash
+docker run -it -v $(pwd)/puf_vm1/scripts/proofs/:/mnt sagemath/sagemath sage /mnt/proof_verifier_calc.sage \
+-gx 0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296 \
+-gy 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5 \
+-hx 0xd13353e86b41f94c8877f68fb95aad0a35820695e2037413bd57a9c447df11d9 \
+-hy 0xa248caebbb366b69fdebd312588b9702d81de34eed740ed27a246d2ee7ba43e4 \
+-COMx 0x76268a64a89d4c78c2583af88854c2dfae6ab162af1b47d4fa49d0d4e3817393 \
+-COMy 0x1e0fb6b50eec5238733969c4ed418b89ff7e3ee593ffb36baae3bdfd09cdb56e \
+-Px 0x6671490b610f21c07146091c168927a0b218ac91695ff531d9f40e430be41123 \
+-Py 0x94bfc6c6f2ba416717469207a4a43ce7e463b93b65d81164d50f1bf8c058acbe \
+-v 0x2f848af2e2f055baf62239b0042e18c09b7bc6fd9092264d0a4b5004cfeb3114f10de68bab6552f4da0450f7636f331b9b29f95b92cd1e6e9e0baf09d1df3e16 \
+-w 0x18fef11fbd03c5975b7e01c36a10fee0f531831ecfe60772f763e43de1cd3c41233cca6667d6b650f2b3ef6b1a5a13bb62861191efc33b17458810ba80f0e5da \
+-n 0X8899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF0011223344556677
+```
+
+There is also the script for generating sagemath command based on the PUF output
+
+```bash
+python3 resources/scripts/cnvrt_puf_output.py <input_file>
+```
+
+_Note: Nonce is 64 bytes long._
