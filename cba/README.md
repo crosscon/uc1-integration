@@ -16,19 +16,21 @@ Follow the steps below to launch the remote server:
     git checkout 45338c7221089058ea09d93f9c17538e118b0aa3
     ```
 
-3. Build the container:
+2. Build the container:
 
     ```bash
     docker build -t crosscon-ra-remote:latest .
     ```
 
-4. Run the server:
+3. Run the server:
 
     ```bash
     docker compose -f ./docker-compose.yml up
     ```
 
-5. Collect the test signature that [will be
+    > Note: the Docker container will be launched in non-interactive mode.
+
+4. Collect the test signature that [will be
   needed](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b029f57422d00420e64369f199981d7e75?tab=readme-ov-file#configuration)
   for CBA TA host application:
 
@@ -37,9 +39,11 @@ Follow the steps below to launch the remote server:
     char SERVER_TEST_SIGNATURE[71] = { 48, 69, 2, 32, 4, 247, 113, 13, 200, 32, 82, 202, 123, 23, 119, 156, 212, 183, 197, 41, 241, 59, 222, 195, 240, 7, 93, 115, 111, 224, 238, 74, 4, 116, 101, 2, 2, 33, 0, 209, 50, 17, 198, 203, 73, 253, 171, 74, 30, 173, 126, 76, 126, 253, 15, 41, 239, 10, 184, 61, 24, 230, 6, 243, 171, 94, 227, 186, 223, 31, 23 };
     ```
 
-    > Note: this is an example signature, you need to generate your own.
+    > Note: this is an example signature, you need to generate your own. Another
+    > thing to note here is that the `SERVER_TEST_SIGNATURE` should be changed
+    > to the proper name of the structure in the destination `.c` file.
 
-6. Check the IP address of the machine the server is running on by using, for
+5. Check the IP address of the machine the server is running on by using, for
   example, `ip a` command. This IP [will be
   needed](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b029f57422d00420e64369f199981d7e75?tab=readme-ov-file#configuration)
   for CBA Pseudo TA.
@@ -56,18 +60,19 @@ checkout the needed commit:
     git clone https://github.com/crosscon/context-based-auth-crosscon-demo.git
     cd context-based-auth-crosscon-demo
     git checkout 3594d0b029f57422d00420e64369f199981d7e75
-    git submodule update --init --recursive
+    GIT_PROGRESS=1 git submodule update --init --recursive --progress --verbose
     ```
 
 2. [Build and
 enter](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b029f57422d00420e64369f199981d7e75/env#build--run-the-container)
   the container.
-3. Copy [devicetree
-  `rpi4-ws/nexmon.dts`](https://github.com/crosscon/context-based-auth-nexmon-vm/blob/9ad70a6ef05947c99b8dcfb205d7bca6f7813eb0/rpi4-ws/nexmon.dts) to the `rpi4-ws` directory and prepare
-  Nexmon VM image (execute these commands inside the container):
+3. Copy [devicetree from the `crosscon/context-based-auth-nexmon-vm` repository
+  `rpi4-ws/nexmon.dts`](https://github.com/crosscon/context-based-auth-nexmon-vm/blob/9ad70a6ef05947c99b8dcfb205d7bca6f7813eb0/rpi4-ws/nexmon.dts)
+  to the `rpi4-ws` directory and prepare Nexmon VM image (execute these commands
+  inside the container):
 
     ```bash
-    dtc -I dts -O dtb -o rpi4-ws/nexmon.dts rpi4-ws/nexmon.dtb
+    dtc -I dts -O dtb -o rpi4-ws/nexmon.dtb rpi4-ws/nexmon.dts
     cd lloader
     rm ./nexmon.bin
     rm ./nexmon.elf
@@ -139,10 +144,10 @@ enter](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b
     > example, `sudo iw wlp0s20f3 scan | grep -E 'SSID:|primary channel|width'`
     > command.
 
-4. [Build](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b029f57422d00420e64369f199981d7e75/env#building-the-rpi4-ws-demo)
+5. [Build](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b029f57422d00420e64369f199981d7e75/env#building-the-rpi4-ws-demo)
   and [prepare](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b029f57422d00420e64369f199981d7e75/env#creating-and-flashing-the-image)
   the image.
-5. [Run](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b029f57422d00420e64369f199981d7e75/env#running-the-image)
+6. [Run](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b029f57422d00420e64369f199981d7e75/env#running-the-image)
   the image.
 
 ## Verifying the demo
@@ -169,9 +174,9 @@ Follow the steps below to verify the demo works correctly:
     ```
 
 4. After the RPi receives the IP, run [the testing
-  commands](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b029f57422d00420e64369f199981d7e75?tab=readme-ov-file#testing). Do not run the `devmem` commands.
-
-5. You should receive `TA result: Ok` for all commands, e.g.:
+  commands.](https://github.com/crosscon/context-based-auth-crosscon-demo/tree/3594d0b029f57422d00420e64369f199981d7e75?tab=readme-ov-file#testing)
+  Do not run the `devmem` commands. The expected results for each of the
+  commands:
 
     ```bash
     # context_based_authentication_demo enroll
@@ -181,6 +186,11 @@ Follow the steps below to verify the demo works correctly:
     # context_based_authentication_demo verify
     TA result: Ok
     ```
+
+    > Note: the `enroll` and `prove` commands may take a while to complete. The
+    > time to complete mostly depends on the
+    > `TA_CONTEXT_BASED_AUTHENTICATION_RECORDING_TIMEOUT` value described in the
+    > [configuration.](https://github.com/crosscon/context-based-auth-crosscon-demo?tab=readme-ov-file#configuration)
 
 ## Issues and debugging tips
 
