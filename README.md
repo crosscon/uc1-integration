@@ -1,4 +1,4 @@
-# crosscon-uc1-1
+# uc1-integration
 
 ## Prepare the Environment
 
@@ -61,19 +61,11 @@ This section instructs on how to build the final demo for Use Case 1.1. As a
 result of the commands listed below, a hypervisor with mutual tls client zephyr
 VM and PUF VM will be deployed and run on the LPC55S69 platform.
 
-**FIX ME: Add link to workflow/components diagram**
-
 #### Prerequisites
 
 Prior to building up this demo (mtls client), one shall first build and deploy
 tls server application. The detailed manual
-[can be found here](https://git.3mdeb.com/3mdeb/crosscon-uc1-2/src/commit/5c429a126d25c22dc9d9ce95838265e7640324ac/include/local_challenge.c#L32).
-
-
-**FIX ME: Fix link when PR is merged.**
-
-Make sure the common codebase has been synced, a `tls_client/src/common` should
-be created and have contents.
+[can be found here](https://github.com/crosscon/uc1-2-integration).
 
 #### Building and flashing TLS Client + PUF
 
@@ -85,7 +77,7 @@ be created and have contents.
 
 1. [Set up wifi credentials](#configure-the-wifi-network) in
    `tls_client/src/wifi_config_local.h` and update IP address of tls server app
-   (`SERVER_ADDR`) in `tls_client/src/main.c `.
+   (`SERVER_ADDR`) in `tls_client/src/main.c`.
 
 1. Copy app overlay to puf_vm1.
 
@@ -179,9 +171,7 @@ This file should follow the following format:
 
 The `sagemath` scripts supplied with the VMs are source of trust for verifying
 PUF authenticity. These can be used for comparison, between
-[the C implementation](https://git.3mdeb.com/3mdeb/crosscon-uc1-2/pulls/10/files#diff-9254371f1043cddfdbcb224e2308086a10512625).
-
-**FIX ME: Update link to file instead to PR when merged.**
+[the C implementation](https://github.com/crosscon/uc1-2-integration/blob/main/include/puf_verifier.c).
 
 #### Running sagemath
 
@@ -245,9 +235,7 @@ printed in total. The single block is `MEMREF Output data:` header followed
 by 32 or 64 byte hex array. These are the values in exact order the script
 excepts. The exception to that rule is the last (`-n` - `nonce`) param, which
 is a constant, predefined value that comes
-[from tls-server source code](https://git.3mdeb.com/3mdeb/crosscon-uc1-2/src/commit/5c429a126d25c22dc9d9ce95838265e7640324ac/include/local_challenge.c#L32).
-
-**FIX ME: Update the link to the file when PR is merged.**
+[from tls-server source code](https://github.com/crosscon/uc1-2-integration/blob/main/include/local_challenge.c#L32).
 
 #### Generating the command
 
