@@ -7,6 +7,7 @@
  */
 
 #include "pufcaller/pufcaller.h"
+#include <stdint.h>
 #include <string.h>
 #include <zephyr/logging/log.h>
 
@@ -28,8 +29,9 @@ LOG_MODULE_REGISTER(MAIN);
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/socket.h>
 
-/* puffcaller */
-#include "pufcaller.h"
+/* pufcaller */
+#include "pufcaller/pufcaller.h"
+#include "common/challenge.h"
 
 /* SSL */
 #ifndef WOLFSSL_USER_SETTINGS
@@ -48,9 +50,13 @@ static struct net_mgmt_event_callback mgmt_cb;
 
 static struct net_dhcpv4_option_callback dhcp_cb;
 
+func_call_t        initCh;
+func_call_t        commCh;
+func_call_t        proofsCh;
+
 /*********** Socket start ***********/
 
-#define SERVER_ADDR  "192.168.10.28"
+#define SERVER_ADDR  "192.168.10.38"
 #define SERVER_PORT  12345
 
 /* DO NOT use this in production. You should implement a way
@@ -206,6 +212,45 @@ static int test_socket_connection(void) {
   cipher = wolfSSL_get_current_cipher(ssl);
   LOG_INF("SSL cipher suite is: %s", wolfSSL_CIPHER_get_name(cipher));
 
+  if (initFunc(&initCh, PUF_TA_INIT_FUNC_ID, pattern_init_commit))
+    LOG_ERR("Failed to allocate memory for the init...");
+  LOG_DBG("Receiving init");
+  if (recChallenge(ssl, &initCh))
+    LOG_ERR("Failed to receive init!");
+
+  if (initFunc(&commCh, PUF_TA_GET_COMMITMENT_FUNC_ID, pattern_init_commit))
+    LOG_ERR("Failed to allocate memory for the commitment...");
+  LOG_DBG("Receiving commitment");
+  if (recChallenge(ssl, &commCh))
+    LOG_ERR("Failed to receive commitment!");
+
+  if (initFunc(&proofsCh, PUF_TA_GET_ZK_PROOFS_FUNC_ID, pattern_proofs))
+    LOG_ERR("Failed to allocate memory for the proofs...");
+  LOG_DBG("Receiving proofs");
+  if (recChallenge(ssl, &proofsCh))
+    LOG_ERR("Failed to receive proofs!");
+
+  LOG_INF("Challenging the PUF");
+  challenge_puf(&initCh, &commCh, &proofsCh);
+
+  LOG_INF("Sending init response");
+  if (sendResponse(ssl, &initCh)) {
+    LOG_INF("Sending init response failed");
+    goto cleanup;
+  }
+
+  LOG_INF("Sending commitment response");
+  if (sendResponse(ssl, &commCh)) {
+    LOG_INF("Sending commitment response failed");
+    goto cleanup;
+  }
+
+  LOG_INF("Sending proofs response");
+  if (sendResponse(ssl, &proofsCh)) {
+    LOG_INF("Sending proofs response failed");
+    goto cleanup;
+  }
+
   /* Construct a message for the server */
   LOG_INF("Constructing message for server...");
   memset(buff, 0, sizeof(buff));
@@ -244,6 +289,9 @@ static int test_socket_connection(void) {
   /* Cleanup and return */
 cleanup:
   wolfSSL_free(ssl);      /* Free the wolfSSL object                  */
+  freeFunc(&initCh);
+  freeFunc(&commCh);
+  freeFunc(&proofsCh);
 ctx_cleanup:
   wolfSSL_CTX_free(ctx);  /* Free the wolfSSL context object          */
   wolfSSL_Cleanup();      /* Cleanup the wolfSSL environment          */
@@ -396,6 +444,9 @@ static void wait_for_dhcp(void) {
 
 
 int main(void) {
+#ifdef IS_ZEPHYR
+  LOG_INF("IS_ZEPHYR defined");
+#endif
   LOG_INF("Hello in WiFi App!");
   net_mgmt_init_event_callback(&cb, wifi_event_handler, NET_EVENT_WIFI_MASK);
   net_mgmt_add_event_callback(&cb);
@@ -414,13 +465,6 @@ int main(void) {
   wait_for_dhcp();
 
   test_socket_connection();
-
-  for (int i = 3; i > 0; i-- ) {
-    LOG_INF("Calling puf vm in %d..", i);
-    k_sleep(K_MSEC(1000));
-  }
-
-  call_puf();
 
   return 0;
 }

@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
+add_compile_definitions(IS_ZEPHYR)
+
 cmake_minimum_required(VERSION 3.20.0)
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(dhcpv4_client)
@@ -10,8 +12,10 @@ target_sources(app PRIVATE ${app_sources})
 
 target_include_directories(app PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/common
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pufcaller
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pufcaller/crosscon_hv
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/pufcaller/crosscon_hv/crosscon_hv_tee
 )
 
 # Optional: define HAS_LOCAL_WIFI_CONFIG if wifi_config_local.h exists
