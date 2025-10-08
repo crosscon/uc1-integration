@@ -76,7 +76,7 @@ VM and PUF VM will be deployed and run on the LPC55S69 platform.
 #### Prerequisites
 
 Prior to building up this demo (mtls client), one shall first build and deploy
-tls server application. The detailed manual
+tls server application. The detailed manual on how to build `NXP_PUF` demo
 [can be found here](https://github.com/crosscon/uc1-2-integration).
 
 #### Building and flashing TLS Client + PUF
