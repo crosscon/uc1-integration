@@ -56,7 +56,7 @@ func_call_t        proofsCh;
 
 /*********** Socket start ***********/
 
-#define SERVER_ADDR  "192.168.10.38"
+#define SERVER_ADDR  "192.168.10.139"
 #define SERVER_PORT  12345
 
 /* DO NOT use this in production. You should implement a way
