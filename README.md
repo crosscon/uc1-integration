@@ -17,6 +17,18 @@ git submodule update --init --recursive
 west init -l && west update
 ```
 
+## Build up the container
+
+The stack for flashing the image to the NPX LPC55S69 uses proprietary Debian
+only binaries, this is why the building script must use dedicated docker
+container to offload some workflows.
+
+To build the container run the following command.
+
+```bash
+docker build resources/building-bao-hypervisor/ -t bao-hypervisor-image
+```
+
 ## Usage
 
 Refer to the `uc1.sh` for details of available options. Some useful scenarios
